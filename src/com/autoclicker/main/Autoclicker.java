@@ -79,7 +79,7 @@ public class Autoclicker implements NativeKeyListener
         active = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("active.png")));
         inactive = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("inactive.png")));
         statusImageLabel = new JLabel(inactive);
-        statusTextLabel = new JLabel("Press F6 to start");
+        statusTextLabel = new JLabel("Not running. Press F6 to start");
         
         // Add items to ComboBox
         timeIntervalUnit.addItem("Days");
@@ -97,6 +97,13 @@ public class Autoclicker implements NativeKeyListener
         // Add item listeners
         eventTypeMouseBox.addItemListener(e -> mouseEventPanel.setVisible(eventTypeMouseBox.isSelected()));
         eventTypeKeyboardBox.addItemListener(e -> keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected()));
+        
+        // Set tooltips
+        timeIntervalPanel.setToolTipText("Amount of time to wait between each action");
+        eventTypePanel.setToolTipText("Which events to execute at the chosen time interval");
+        mouseEventPanel.setToolTipText("Which mouse event to execute per action");
+        keyboardEventPanel.setToolTipText("Which keyboard event to execute per action");
+        keyboardEventRecorder.setToolTipText("<html>Press to start recording key inputs.<br>The next key input will be set as the key event.");
         
         // Add objects to panels
         timeIntervalPanel.add(timeIntervalLabel);
@@ -158,12 +165,14 @@ public class Autoclicker implements NativeKeyListener
                 // Disable autoclicker
                 running = false;
                 statusImageLabel.setIcon(inactive);
+                statusTextLabel.setText("Not running. Press F6 to start");
             }
             else
             {
                 // Enable autoclicker
                 running = true;
                 statusImageLabel.setIcon(active);
+                statusTextLabel.setText("Running. Press F6 to stop");
                 
                 // Create new thread to handle autoclicking
                 new Thread(() ->
