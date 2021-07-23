@@ -1,10 +1,14 @@
 package com.autoclicker.main;
 
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
 import javax.swing.*;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Soni
@@ -124,6 +128,11 @@ public class Autoclicker implements NativeKeyListener
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         frame.setVisible(true);
+        
+        // Set JNativeHook logging
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
+        logger.setUseParentHandlers(false);
     }
     
     @Override
@@ -135,7 +144,7 @@ public class Autoclicker implements NativeKeyListener
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
     {
-    
+        System.out.println(nativeKeyEvent.getKeyCode());
     }
     
     @Override
@@ -146,6 +155,9 @@ public class Autoclicker implements NativeKeyListener
     
     public static void main(String[] args)
     {
-        new Autoclicker();
+        try { GlobalScreen.registerNativeHook(); }
+        catch (NativeHookException e) { e.printStackTrace(); }
+        
+        GlobalScreen.addNativeKeyListener(new Autoclicker());
     }
 }
