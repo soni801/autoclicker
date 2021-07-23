@@ -84,6 +84,10 @@ public class Autoclicker implements NativeKeyListener
         mouseEventAction.addItem("Middle Click");
         mouseEventAction.addItem("Right Click");
         
+        // Add item listeners
+        eventTypeMouseBox.addItemListener(e -> mouseEventPanel.setVisible(eventTypeMouseBox.isSelected()));
+        eventTypeKeyboardBox.addItemListener(e -> keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected()));
+        
         // Add objects to panels
         timeIntervalPanel.add(timeIntervalLabel);
         timeIntervalPanel.add(timeIntervalField);
@@ -109,9 +113,13 @@ public class Autoclicker implements NativeKeyListener
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
         
+        // Set visibility
+        mouseEventPanel.setVisible(false);
+        keyboardEventPanel.setVisible(false);
+        
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
-        frame.setSize(300, 300);
+        frame.setSize(320, 230);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
