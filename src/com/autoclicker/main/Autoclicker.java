@@ -17,13 +17,18 @@ public class Autoclicker implements NativeKeyListener
     JPanel timeIntervalPanel;
     JLabel timeIntervalLabel;
     JTextField timeIntervalField;
-    JComboBox<String> timeIntervalUnitSelector;
+    JComboBox<String> timeIntervalUnit;
     
     // Event type
     JPanel eventTypePanel;
     JLabel eventTypeLabel;
     JCheckBox eventTypeMouseBox;
     JCheckBox eventTypeKeyboardBox;
+    
+    // Mouse event
+    JPanel mouseEventPanel;
+    JLabel mouseEventLabel;
+    JComboBox<String> mouseEventAction;
     
     public Autoclicker()
     {
@@ -33,33 +38,45 @@ public class Autoclicker implements NativeKeyListener
         timeIntervalPanel = new JPanel();
         timeIntervalLabel = new JLabel("Time interval:");
         timeIntervalField = new JTextField(4);
-        timeIntervalUnitSelector = new JComboBox<>();
+        timeIntervalUnit = new JComboBox<>();
         
         eventTypePanel = new JPanel();
         eventTypeLabel = new JLabel("Event type:");
         eventTypeMouseBox = new JCheckBox("Mouse");
         eventTypeKeyboardBox = new JCheckBox("Keyboard");
         
+        mouseEventPanel = new JPanel();
+        mouseEventLabel = new JLabel("Mouse event:");
+        mouseEventAction = new JComboBox<>();
+        
         // Add items to ComboBox
-        timeIntervalUnitSelector.addItem("Hours");
-        timeIntervalUnitSelector.addItem("Minutes");
-        timeIntervalUnitSelector.addItem("Seconds");
-        timeIntervalUnitSelector.addItem("Milliseconds");
-        timeIntervalUnitSelector.addItem("Microseconds");
-        timeIntervalUnitSelector.addItem("Nanoseconds");
+        timeIntervalUnit.addItem("Hours");
+        timeIntervalUnit.addItem("Minutes");
+        timeIntervalUnit.addItem("Seconds");
+        timeIntervalUnit.addItem("Milliseconds");
+        timeIntervalUnit.addItem("Microseconds");
+        timeIntervalUnit.addItem("Nanoseconds");
+        
+        mouseEventAction.addItem("Left Click");
+        mouseEventAction.addItem("Middle Click");
+        mouseEventAction.addItem("Right Click");
         
         // Add objects to panels
         timeIntervalPanel.add(timeIntervalLabel);
         timeIntervalPanel.add(timeIntervalField);
-        timeIntervalPanel.add(timeIntervalUnitSelector);
+        timeIntervalPanel.add(timeIntervalUnit);
         
         eventTypePanel.add(eventTypeLabel);
         eventTypePanel.add(eventTypeMouseBox);
         eventTypePanel.add(eventTypeKeyboardBox);
         
+        mouseEventPanel.add(mouseEventLabel);
+        mouseEventPanel.add(mouseEventAction);
+        
         // Add panels to frame
         frame.add(timeIntervalPanel);
         frame.add(eventTypePanel);
+        frame.add(mouseEventPanel);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
