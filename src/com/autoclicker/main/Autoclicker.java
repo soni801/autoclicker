@@ -19,6 +19,12 @@ public class Autoclicker implements NativeKeyListener
     JTextField timeIntervalField;
     JComboBox<String> timeIntervalUnitSelector;
     
+    // Event type
+    JPanel eventTypePanel;
+    JLabel eventTypeLabel;
+    JCheckBox eventTypeMouseBox;
+    JCheckBox eventTypeKeyboardBox;
+    
     public Autoclicker()
     {
         // Initialise objects
@@ -28,6 +34,11 @@ public class Autoclicker implements NativeKeyListener
         timeIntervalLabel = new JLabel("Time interval:");
         timeIntervalField = new JTextField(4);
         timeIntervalUnitSelector = new JComboBox<>();
+        
+        eventTypePanel = new JPanel();
+        eventTypeLabel = new JLabel("Event type:");
+        eventTypeMouseBox = new JCheckBox("Mouse");
+        eventTypeKeyboardBox = new JCheckBox("Keyboard");
         
         // Add items to ComboBox
         timeIntervalUnitSelector.addItem("Hours");
@@ -42,8 +53,13 @@ public class Autoclicker implements NativeKeyListener
         timeIntervalPanel.add(timeIntervalField);
         timeIntervalPanel.add(timeIntervalUnitSelector);
         
+        eventTypePanel.add(eventTypeLabel);
+        eventTypePanel.add(eventTypeMouseBox);
+        eventTypePanel.add(eventTypeKeyboardBox);
+        
         // Add panels to frame
         frame.add(timeIntervalPanel);
+        frame.add(eventTypePanel);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
