@@ -146,6 +146,10 @@ public class Autoclicker implements NativeKeyListener
         Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
         logger.setLevel(Level.OFF);
         logger.setUseParentHandlers(false);
+        
+        // Remove unfinished features for release
+        eventTypeKeyboardBox.setEnabled(false);
+        eventTypeKeyboardBox.setToolTipText("Not available");
     }
     
     @Override
