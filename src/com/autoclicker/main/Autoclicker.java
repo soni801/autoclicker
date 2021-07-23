@@ -30,6 +30,11 @@ public class Autoclicker implements NativeKeyListener
     JLabel mouseEventLabel;
     JComboBox<String> mouseEventAction;
     
+    // Keyboard event
+    JPanel keyboardEventPanel;
+    JLabel keyboardEventLabel;
+    JButton keyboardEventRecorder;
+    
     public Autoclicker()
     {
         // Initialise objects
@@ -48,6 +53,10 @@ public class Autoclicker implements NativeKeyListener
         mouseEventPanel = new JPanel();
         mouseEventLabel = new JLabel("Mouse event:");
         mouseEventAction = new JComboBox<>();
+    
+        keyboardEventPanel = new JPanel();
+        keyboardEventLabel = new JLabel("Keyboard event:");
+        keyboardEventRecorder = new JButton("Record key");
         
         // Add items to ComboBox
         timeIntervalUnit.addItem("Hours");
@@ -73,10 +82,14 @@ public class Autoclicker implements NativeKeyListener
         mouseEventPanel.add(mouseEventLabel);
         mouseEventPanel.add(mouseEventAction);
         
+        keyboardEventPanel.add(keyboardEventLabel);
+        keyboardEventPanel.add(keyboardEventRecorder);
+        
         // Add panels to frame
         frame.add(timeIntervalPanel);
         frame.add(eventTypePanel);
         frame.add(mouseEventPanel);
+        frame.add(keyboardEventPanel);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
