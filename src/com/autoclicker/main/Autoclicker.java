@@ -4,6 +4,7 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  * @author Soni
@@ -35,6 +36,13 @@ public class Autoclicker implements NativeKeyListener
     JLabel keyboardEventLabel;
     JButton keyboardEventRecorder;
     
+    // Status
+    JPanel statusPanel;
+    ImageIcon active;
+    ImageIcon inactive;
+    JLabel statusImageLabel;
+    JLabel statusTextLabel;
+    
     public Autoclicker()
     {
         // Initialise objects
@@ -57,6 +65,12 @@ public class Autoclicker implements NativeKeyListener
         keyboardEventPanel = new JPanel();
         keyboardEventLabel = new JLabel("Keyboard event:");
         keyboardEventRecorder = new JButton("Record key");
+        
+        statusPanel = new JPanel();
+        active = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("active.png")));
+        inactive = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("inactive.png")));
+        statusImageLabel = new JLabel(inactive);
+        statusTextLabel = new JLabel("Press F6 to start");
         
         // Add items to ComboBox
         timeIntervalUnit.addItem("Hours");
@@ -85,11 +99,15 @@ public class Autoclicker implements NativeKeyListener
         keyboardEventPanel.add(keyboardEventLabel);
         keyboardEventPanel.add(keyboardEventRecorder);
         
+        statusPanel.add(statusImageLabel);
+        statusPanel.add(statusTextLabel);
+        
         // Add panels to frame
         frame.add(timeIntervalPanel);
         frame.add(eventTypePanel);
         frame.add(mouseEventPanel);
         frame.add(keyboardEventPanel);
+        frame.add(statusPanel);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
