@@ -4,6 +4,7 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
+import org.jnativehook.keyboard.SwingKeyAdapter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,10 +17,11 @@ import java.util.logging.Logger;
 /**
  * @author Soni
  */
-public class Autoclicker implements NativeKeyListener
+public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
 {
     boolean running;
     boolean recording;
+    int keyboardEvent;
     
     // Frame
     JFrame frame;
@@ -158,10 +160,7 @@ public class Autoclicker implements NativeKeyListener
     }
     
     @Override
-    public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent)
-    {
-    
-    }
+    public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent) { }
     
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
@@ -171,6 +170,7 @@ public class Autoclicker implements NativeKeyListener
         {
             recording = false;
             keyboardEventRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
+            keyboardEvent = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
         }
         else
         {
@@ -224,7 +224,8 @@ public class Autoclicker implements NativeKeyListener
                                 // Check to do keyboard action
                                 if (eventTypeKeyboardBox.isSelected())
                                 {
-                            
+                                    robot.keyPress(keyboardEvent);
+                                    robot.keyRelease(keyboardEvent);
                                 }
                         
                                 // Sleep for the desired amount of time
@@ -251,10 +252,7 @@ public class Autoclicker implements NativeKeyListener
     }
     
     @Override
-    public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent)
-    {
-    
-    }
+    public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) { }
     
     public static void main(String[] args)
     {
