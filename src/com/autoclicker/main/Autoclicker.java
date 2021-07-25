@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 public class Autoclicker implements NativeKeyListener
 {
     boolean running;
+    boolean recording;
     
     // Frame
     JFrame frame;
@@ -94,9 +95,17 @@ public class Autoclicker implements NativeKeyListener
         mouseEventAction.addItem("Middle Click");
         mouseEventAction.addItem("Right Click");
         
-        // Add item listeners
+        // Add listeners
         eventTypeMouseBox.addItemListener(e -> mouseEventPanel.setVisible(eventTypeMouseBox.isSelected()));
         eventTypeKeyboardBox.addItemListener(e -> keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected()));
+        keyboardEventRecorder.addActionListener(e ->
+        {
+            recording = true;
+            keyboardEventRecorder.setText("Recording...");
+        });
+        
+        // Set abstract requirements
+        keyboardEventRecorder.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
         
         // Set tooltips
         timeIntervalPanel.setToolTipText("Amount of time to wait between each action");
@@ -146,10 +155,6 @@ public class Autoclicker implements NativeKeyListener
         Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
         logger.setLevel(Level.OFF);
         logger.setUseParentHandlers(false);
-        
-        // Remove unfinished features for release
-        eventTypeKeyboardBox.setEnabled(false);
-        eventTypeKeyboardBox.setToolTipText("Not available");
     }
     
     @Override
@@ -161,77 +166,86 @@ public class Autoclicker implements NativeKeyListener
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
     {
-        // Check for correct key press
-        if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_F6)
+        // Check that the application is not recording for a new key action
+        if (recording)
         {
-            if (running)
+            recording = false;
+            keyboardEventRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
+        }
+        else
+        {
+            // Check for correct key press to enable autoclicker
+            if (nativeKeyEvent.getKeyCode() == NativeKeyEvent.VC_F6)
             {
-                // Disable autoclicker
-                running = false;
-                statusImageLabel.setIcon(inactive);
-                statusTextLabel.setText("Not running. Press F6 to start");
-            }
-            else
-            {
-                // Enable autoclicker
-                running = true;
-                statusImageLabel.setIcon(active);
-                statusTextLabel.setText("Running. Press F6 to stop");
-                
-                // Create new thread to handle autoclicking
-                new Thread(() ->
+                if (running)
                 {
-                    try
+                    // Disable autoclicker
+                    running = false;
+                    statusImageLabel.setIcon(inactive);
+                    statusTextLabel.setText("Not running. Press F6 to start");
+                }
+                else
+                {
+                    // Enable autoclicker
+                    running = true;
+                    statusImageLabel.setIcon(active);
+                    statusTextLabel.setText("Running. Press F6 to stop");
+            
+                    // Create new thread to handle autoclicking
+                    new Thread(() ->
                     {
-                        // Create robot immediately when thread starts
-                        Robot robot = new Robot();
-                        
-                        // Loop while autoclicker is running
-                        while (running)
+                        try
                         {
-                            // Check to do mouse action
-                            if (eventTypeMouseBox.isSelected())
+                            // Create robot immediately when thread starts
+                            Robot robot = new Robot();
+                    
+                            // Loop while autoclicker is running
+                            while (running)
                             {
-                                // Initialise button to 0 to avoid having default branch in switch statement
-                                int button = 0;
-        
-                                // Check which mouse action to do
-                                switch (Objects.requireNonNull(mouseEventAction.getSelectedItem()).toString())
+                                // Check to do mouse action
+                                if (eventTypeMouseBox.isSelected())
                                 {
-                                    case "Left Click" -> button = InputEvent.BUTTON1_DOWN_MASK;
-                                    case "Middle Click" -> button = InputEvent.BUTTON2_DOWN_MASK;
-                                    case "Right Click" -> button = InputEvent.BUTTON3_DOWN_MASK;
-                                }
-        
-                                // Execute mouse action
-                                robot.mousePress(button);
-                                robot.mouseRelease(button);
-                            }
-    
-                            // Check to do keyboard action
-                            if (eventTypeKeyboardBox.isSelected())
-                            {
-        
-                            }
+                                    // Initialise button to 0 to avoid having default branch in switch statement
+                                    int button = 0;
                             
-                            // Sleep for the desired amount of time
-                            switch (Objects.requireNonNull(timeIntervalUnit.getSelectedItem()).toString())
-                            {
-                                case "Days" -> TimeUnit.DAYS.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Hours" -> TimeUnit.HOURS.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Minutes" -> TimeUnit.MINUTES.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Seconds" -> TimeUnit.SECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Milliseconds" -> TimeUnit.MILLISECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Microseconds" -> TimeUnit.MICROSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
-                                case "Nanoseconds" -> TimeUnit.NANOSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    // Check which mouse action to do
+                                    switch (Objects.requireNonNull(mouseEventAction.getSelectedItem()).toString())
+                                    {
+                                        case "Left Click" -> button = InputEvent.BUTTON1_DOWN_MASK;
+                                        case "Middle Click" -> button = InputEvent.BUTTON2_DOWN_MASK;
+                                        case "Right Click" -> button = InputEvent.BUTTON3_DOWN_MASK;
+                                    }
+                            
+                                    // Execute mouse action
+                                    robot.mousePress(button);
+                                    robot.mouseRelease(button);
+                                }
+                        
+                                // Check to do keyboard action
+                                if (eventTypeKeyboardBox.isSelected())
+                                {
+                            
+                                }
+                        
+                                // Sleep for the desired amount of time
+                                switch (Objects.requireNonNull(timeIntervalUnit.getSelectedItem()).toString())
+                                {
+                                    case "Days" -> TimeUnit.DAYS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Hours" -> TimeUnit.HOURS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Minutes" -> TimeUnit.MINUTES.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Seconds" -> TimeUnit.SECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Milliseconds" -> TimeUnit.MILLISECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Microseconds" -> TimeUnit.MICROSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                    case "Nanoseconds" -> TimeUnit.NANOSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
+                                }
                             }
                         }
-                    }
-                    catch (AWTException | InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }).start();
+                        catch (AWTException | InterruptedException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
             }
         }
     }
