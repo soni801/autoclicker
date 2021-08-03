@@ -98,8 +98,22 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         mouseEventAction.addItem("Right Click");
         
         // Add listeners
-        eventTypeMouseBox.addItemListener(e -> mouseEventPanel.setVisible(eventTypeMouseBox.isSelected()));
-        eventTypeKeyboardBox.addItemListener(e -> keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected()));
+        eventTypeMouseBox.addItemListener(e ->
+        {
+            if(eventTypeMouseBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40);
+            else frame.setSize(frame.getWidth(), frame.getHeight() - 40);
+            
+            mouseEventPanel.setVisible(eventTypeMouseBox.isSelected());
+        });
+        
+        eventTypeKeyboardBox.addItemListener(e ->
+        {
+            if(eventTypeKeyboardBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40);
+            else frame.setSize(frame.getWidth(), frame.getHeight() - 40);
+            
+            keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected());
+        });
+        
         keyboardEventRecorder.addActionListener(e ->
         {
             recording = true;
@@ -147,7 +161,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
-        frame.setSize(320, 230);
+        frame.setSize(320, 170);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
