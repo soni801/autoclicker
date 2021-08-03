@@ -186,6 +186,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
         
+        // Set default combo box values
+        timeIntervalUnit.setSelectedItem("Milliseconds");
+        jitterAmountUnit.setSelectedItem("Milliseconds");
+        
         // Set enabled & visibility
         jitterAmountField.setEnabled(false);
         jitterAmountUnit.setEnabled(false);
