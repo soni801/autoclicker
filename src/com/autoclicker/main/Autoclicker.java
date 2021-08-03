@@ -32,6 +32,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     JTextField timeIntervalField;
     JComboBox<String> timeIntervalUnit;
     
+    // Jitter amount
+    JPanel jitterAmountPanel;
+    JCheckBox jitterAmountCheckBox;
+    JTextField jitterAmountField;
+    JComboBox<String> jitterAmountUnit;
+    
     // Event type
     JPanel eventTypePanel;
     JLabel eventTypeLabel;
@@ -64,6 +70,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         timeIntervalLabel = new JLabel("Time interval:");
         timeIntervalField = new JTextField(4);
         timeIntervalUnit = new JComboBox<>();
+    
+        jitterAmountPanel = new JPanel();
+        jitterAmountCheckBox = new JCheckBox("Jitter");
+        jitterAmountField = new JTextField(4);
+        jitterAmountUnit = new JComboBox<>();
         
         eventTypePanel = new JPanel();
         eventTypeLabel = new JLabel("Event type:");
@@ -92,12 +103,26 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         timeIntervalUnit.addItem("Milliseconds");
         timeIntervalUnit.addItem("Microseconds");
         timeIntervalUnit.addItem("Nanoseconds");
+    
+        jitterAmountUnit.addItem("Days");
+        jitterAmountUnit.addItem("Hours");
+        jitterAmountUnit.addItem("Minutes");
+        jitterAmountUnit.addItem("Seconds");
+        jitterAmountUnit.addItem("Milliseconds");
+        jitterAmountUnit.addItem("Microseconds");
+        jitterAmountUnit.addItem("Nanoseconds");
         
         mouseEventAction.addItem("Left Click");
         mouseEventAction.addItem("Middle Click");
         mouseEventAction.addItem("Right Click");
         
         // Add listeners
+        jitterAmountCheckBox.addItemListener(e ->
+        {
+            jitterAmountField.setEnabled(jitterAmountCheckBox.isSelected());
+            jitterAmountUnit.setEnabled(jitterAmountCheckBox.isSelected());
+        });
+        
         eventTypeMouseBox.addItemListener(e ->
         {
             if(eventTypeMouseBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40);
@@ -125,6 +150,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         
         // Set tooltips
         timeIntervalPanel.setToolTipText("Amount of time to wait between each action");
+        jitterAmountPanel.setToolTipText("Timing inconsistency (jitter)");
         eventTypePanel.setToolTipText("Which events to execute at the chosen time interval");
         mouseEventPanel.setToolTipText("Which mouse event to execute per action");
         keyboardEventPanel.setToolTipText("Which keyboard event to execute per action");
@@ -134,6 +160,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         timeIntervalPanel.add(timeIntervalLabel);
         timeIntervalPanel.add(timeIntervalField);
         timeIntervalPanel.add(timeIntervalUnit);
+        
+        jitterAmountPanel.add(jitterAmountCheckBox);
+        jitterAmountPanel.add(jitterAmountField);
+        jitterAmountPanel.add(jitterAmountUnit);
         
         eventTypePanel.add(eventTypeLabel);
         eventTypePanel.add(eventTypeMouseBox);
@@ -150,18 +180,21 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         
         // Add panels to frame
         frame.add(timeIntervalPanel);
+        frame.add(jitterAmountPanel);
         frame.add(eventTypePanel);
         frame.add(mouseEventPanel);
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
         
-        // Set visibility
+        // Set enabled & visibility
+        jitterAmountField.setEnabled(false);
+        jitterAmountUnit.setEnabled(false);
         mouseEventPanel.setVisible(false);
         keyboardEventPanel.setVisible(false);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
-        frame.setSize(320, 170);
+        frame.setSize(320, 200);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
