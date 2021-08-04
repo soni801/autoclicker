@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -145,12 +146,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
             keyboardEventRecorder.setText("Recording...");
         });
         
-        // Set abstract requirements
+        // Disable space activating key recording
         keyboardEventRecorder.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
         
         // Set tooltips
         timeIntervalPanel.setToolTipText("Amount of time to wait between each action");
-        jitterAmountPanel.setToolTipText("Timing inconsistency (jitter)");
+        jitterAmountCheckBox.setToolTipText("<html>Timing inconsistency (jitter)<br>A random number between 0 and the specified jitter will be chosen<br>and added to the time interval at each action.");
         eventTypePanel.setToolTipText("Which events to execute at the chosen time interval");
         mouseEventPanel.setToolTipText("Which mouse event to execute per action");
         keyboardEventPanel.setToolTipText("Which keyboard event to execute per action");
@@ -204,11 +205,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         frame.setVisible(true);
-        
-        // Set JNativeHook logging
-        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.OFF);
-        logger.setUseParentHandlers(false);
     }
     
     @Override
@@ -254,6 +250,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                             // Loop while autoclicker is running
                             while (running)
                             {
+                                // TODO: Print time interval
+                                
                                 // Check to do mouse action
                                 if (eventTypeMouseBox.isSelected())
                                 {
@@ -291,6 +289,22 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                                     case "Microseconds" -> TimeUnit.MICROSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
                                     case "Nanoseconds" -> TimeUnit.NANOSECONDS.sleep(Long.parseLong(timeIntervalField.getText()));
                                 }
+    
+                                // Sleep for jitter amount
+                                if (jitterAmountCheckBox.isSelected())
+                                {
+                                    long amount = new Random().nextInt(Integer.parseInt(jitterAmountField.getText()));
+                                    switch (Objects.requireNonNull(jitterAmountUnit.getSelectedItem()).toString())
+                                    {
+                                        case "Days" -> TimeUnit.DAYS.sleep(amount);
+                                        case "Hours" -> TimeUnit.HOURS.sleep(amount);
+                                        case "Minutes" -> TimeUnit.MINUTES.sleep(amount);
+                                        case "Seconds" -> TimeUnit.SECONDS.sleep(amount);
+                                        case "Milliseconds" -> TimeUnit.MILLISECONDS.sleep(amount);
+                                        case "Microseconds" -> TimeUnit.MICROSECONDS.sleep(amount);
+                                        case "Nanoseconds" -> TimeUnit.NANOSECONDS.sleep(amount);
+                                    }
+                                }
                             }
                         }
                         catch (AWTException | InterruptedException e)
@@ -308,9 +322,16 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     
     public static void main(String[] args)
     {
+        // Set JNativeHook logging
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
+        logger.setUseParentHandlers(false);
+        
+        // Register native hook
         try { GlobalScreen.registerNativeHook(); }
         catch (NativeHookException e) { e.printStackTrace(); }
         
+        // Add key listener
         GlobalScreen.addNativeKeyListener(new Autoclicker());
     }
 }
