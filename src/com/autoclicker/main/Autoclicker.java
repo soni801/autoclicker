@@ -23,6 +23,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     boolean running;
     boolean recording;
     int keyboardEvent;
+    long waitTime;
     
     // Frame
     JFrame frame;
@@ -250,7 +251,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                             // Loop while autoclicker is running
                             while (running)
                             {
-                                // TODO: Print time interval
+                                // Print wait amount
+                                System.out.printf("Waited %dms\n", System.currentTimeMillis() - waitTime);
                                 
                                 // Check to do mouse action
                                 if (eventTypeMouseBox.isSelected())
@@ -278,6 +280,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                                     robot.keyRelease(keyboardEvent);
                                 }
                         
+                                waitTime = System.currentTimeMillis();
+                                
                                 // Sleep for the desired amount of time
                                 switch (Objects.requireNonNull(timeIntervalUnit.getSelectedItem()).toString())
                                 {
