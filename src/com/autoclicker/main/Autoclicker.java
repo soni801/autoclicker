@@ -7,6 +7,7 @@ import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.keyboard.SwingKeyAdapter;
 import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseListener;
+import org.jnativehook.mouse.NativeMouseMotionListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
 /**
  * @author Soni
  */
-public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener
+public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener, NativeMouseMotionListener
 {
     boolean running;
     int keyboardEvent;
@@ -184,11 +185,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             mousePositionRecorderPanel.setVisible(mousePositionCheckBox.isSelected());
         });
         
-        mousePositionRecorderRecorder.addActionListener(e ->
-        {
-            recordingMouse = true;
-            mousePositionRecorderRecorder.setText("Recording...");
-        });
+        mousePositionRecorderRecorder.addActionListener(e -> recordingMouse = true);
         
         keyboardEventRecorder.addActionListener(e ->
         {
@@ -272,6 +269,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Add native listeners
         GlobalScreen.addNativeKeyListener(this);
         GlobalScreen.addNativeMouseListener(this);
+        GlobalScreen.addNativeMouseMotionListener(this);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
@@ -425,6 +423,19 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     
     @Override
     public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) { }
+    
+    @Override
+    public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent)
+    {
+        // Check if the application is recording mouse position
+        if (recordingMouse)
+        {
+            mousePositionRecorderRecorder.setText(String.format("(%d, %d)", nativeMouseEvent.getX(), nativeMouseEvent.getY()));
+        }
+    }
+    
+    @Override
+    public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) { }
     
     public static void main(String[] args)
     {
