@@ -202,6 +202,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         frame.setTitle("Soni's Autoclicker");
         frame.setSize(320, 200);
         frame.setResizable(false);
+        frame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
