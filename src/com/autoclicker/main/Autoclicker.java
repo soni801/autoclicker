@@ -23,9 +23,11 @@ import java.util.logging.Logger;
 public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener
 {
     boolean running;
-    boolean recording;
     int keyboardEvent;
     long waitTime;
+    
+    boolean recordingMouse;
+    boolean recordingKeyboard;
     
     // Frame
     JFrame frame;
@@ -182,9 +184,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             mousePositionRecorderPanel.setVisible(mousePositionCheckBox.isSelected());
         });
         
+        mousePositionRecorderRecorder.addActionListener(e ->
+        {
+            recordingMouse = true;
+            mousePositionRecorderRecorder.setText("Recording...");
+        });
+        
         keyboardEventRecorder.addActionListener(e ->
         {
-            recording = true;
+            recordingKeyboard = true;
             keyboardEventRecorder.setText("Recording...");
         });
         
@@ -282,10 +290,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
     {
-        // Check that the application is not recording for a new key action
-        if (recording)
+        // Check if the application is recording for a new key action
+        if (recordingKeyboard)
         {
-            recording = false;
+            recordingKeyboard = false;
             keyboardEventRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
             keyboardEvent = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
         }
@@ -402,7 +410,18 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public void nativeMouseClicked(NativeMouseEvent nativeMouseEvent) { }
     
     @Override
-    public void nativeMousePressed(NativeMouseEvent nativeMouseEvent) { }
+    public void nativeMousePressed(NativeMouseEvent nativeMouseEvent)
+    {
+        // Check if the application is recording mouse position
+        if (recordingMouse)
+        {
+            recordingMouse = false;
+            mousePositionRecorderRecorder.setText("Record");
+            
+            mousePositionWriteX.setText(String.valueOf(nativeMouseEvent.getX()));
+            mousePositionWriteY.setText(String.valueOf(nativeMouseEvent.getY()));
+        }
+    }
     
     @Override
     public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) { }
