@@ -5,6 +5,8 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import org.jnativehook.keyboard.SwingKeyAdapter;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * @author Soni
  */
-public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
+public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener
 {
     boolean running;
     boolean recording;
@@ -54,11 +56,18 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     // Mouse position
     JPanel mousePositionPanel;
     JCheckBox mousePositionCheckBox;
-    JPanel mousePositionSetPanel;
-    JLabel mousePositionSetXLabel;
-    JTextField mousePositionSetX;
-    JLabel mousePositionSetYLabel;
-    JTextField mousePositionSetY;
+    
+    // Mouse position write
+    JPanel mousePositionWritePanel;
+    JLabel mousePositionWriteXLabel;
+    JTextField mousePositionWriteX;
+    JLabel mousePositionWriteYLabel;
+    JTextField mousePositionWriteY;
+    
+    // Mouse position recorder
+    JPanel mousePositionRecorderPanel;
+    JLabel mousePositionRecorderLabel;
+    JButton mousePositionRecorderRecorder;
     
     // Keyboard event
     JPanel keyboardEventPanel;
@@ -97,12 +106,17 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         mouseEventAction = new JComboBox<>();
     
         mousePositionPanel = new JPanel();
-        mousePositionCheckBox = new JCheckBox("Set mouse position");
-        mousePositionSetPanel = new JPanel();
-        mousePositionSetXLabel = new JLabel("X:");
-        mousePositionSetX = new JTextField(3);
-        mousePositionSetYLabel = new JLabel("Y:");
-        mousePositionSetY = new JTextField(3);
+        mousePositionCheckBox = new JCheckBox("Specific mouse position");
+        
+        mousePositionWritePanel = new JPanel();
+        mousePositionWriteXLabel = new JLabel("Write a mouse position: X:");
+        mousePositionWriteX = new JTextField(3);
+        mousePositionWriteYLabel = new JLabel("Y:");
+        mousePositionWriteY = new JTextField(3);
+        
+        mousePositionRecorderPanel = new JPanel();
+        mousePositionRecorderLabel = new JLabel("Or record a mouse position:");
+        mousePositionRecorderRecorder = new JButton("Record");
         
         keyboardEventPanel = new JPanel();
         keyboardEventLabel = new JLabel("Keyboard event:");
@@ -159,7 +173,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
             keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected());
         });
         
-        mousePositionCheckBox.addItemListener(e -> mousePositionSetPanel.setVisible(mousePositionCheckBox.isSelected()));
+        mousePositionCheckBox.addItemListener(e ->
+        {
+            if(mousePositionCheckBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40 + 40);
+            else frame.setSize(frame.getWidth(), frame.getHeight() - 40 - 40);
+            
+            mousePositionWritePanel.setVisible(mousePositionCheckBox.isSelected());
+            mousePositionRecorderPanel.setVisible(mousePositionCheckBox.isSelected());
+        });
         
         keyboardEventRecorder.addActionListener(e ->
         {
@@ -196,11 +217,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         mouseEventPanel.add(mouseEventAction);
         
         mousePositionPanel.add(mousePositionCheckBox);
-        mousePositionSetPanel.add(mousePositionSetXLabel);
-        mousePositionSetPanel.add(mousePositionSetX);
-        mousePositionSetPanel.add(mousePositionSetYLabel);
-        mousePositionSetPanel.add(mousePositionSetY);
-        mousePositionPanel.add(mousePositionSetPanel);
+        
+        mousePositionWritePanel.add(mousePositionWriteXLabel);
+        mousePositionWritePanel.add(mousePositionWriteX);
+        mousePositionWritePanel.add(mousePositionWriteYLabel);
+        mousePositionWritePanel.add(mousePositionWriteY);
+        
+        mousePositionRecorderPanel.add(mousePositionRecorderLabel);
+        mousePositionRecorderPanel.add(mousePositionRecorderRecorder);
         
         keyboardEventPanel.add(keyboardEventLabel);
         keyboardEventPanel.add(keyboardEventRecorder);
@@ -214,6 +238,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         frame.add(eventTypePanel);
         frame.add(mouseEventPanel);
         frame.add(mousePositionPanel);
+        frame.add(mousePositionWritePanel);
+        frame.add(mousePositionRecorderPanel);
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
         
@@ -226,8 +252,18 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         jitterAmountUnit.setEnabled(false);
         mouseEventPanel.setVisible(false);
         mousePositionPanel.setVisible(false);
-        mousePositionSetPanel.setVisible(false);
+        mousePositionWritePanel.setVisible(false);
+        mousePositionRecorderPanel.setVisible(false);
         keyboardEventPanel.setVisible(false);
+    
+        // Set JNativeHook logging
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
+        logger.setUseParentHandlers(false);
+    
+        // Add native listeners
+        GlobalScreen.addNativeKeyListener(this);
+        GlobalScreen.addNativeMouseListener(this);
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
@@ -292,7 +328,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                                     // Check to position mouse
                                     if (mousePositionCheckBox.isSelected())
                                     {
-                                        robot.mouseMove(Integer.parseInt(mousePositionSetX.getText()), Integer.parseInt(mousePositionSetY.getText()));
+                                        robot.mouseMove(Integer.parseInt(mousePositionWriteX.getText()), Integer.parseInt(mousePositionWriteY.getText()));
                                     }
                                     
                                     // Initialise button to 0
@@ -362,18 +398,21 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     @Override
     public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) { }
     
+    @Override
+    public void nativeMouseClicked(NativeMouseEvent nativeMouseEvent) { }
+    
+    @Override
+    public void nativeMousePressed(NativeMouseEvent nativeMouseEvent) { }
+    
+    @Override
+    public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) { }
+    
     public static void main(String[] args)
     {
-        // Set JNativeHook logging
-        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.OFF);
-        logger.setUseParentHandlers(false);
-        
         // Register native hook
         try { GlobalScreen.registerNativeHook(); }
         catch (NativeHookException e) { e.printStackTrace(); }
         
-        // Add key listener
-        GlobalScreen.addNativeKeyListener(new Autoclicker());
+        new Autoclicker();
     }
 }
