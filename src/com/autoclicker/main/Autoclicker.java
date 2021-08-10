@@ -51,6 +51,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
     JLabel mouseEventLabel;
     JComboBox<String> mouseEventAction;
     
+    // Mouse position
+    JPanel mousePositionPanel;
+    JCheckBox mousePositionCheckBox;
+    JPanel mousePositionSetPanel;
+    JLabel mousePositionSetXLabel;
+    JTextField mousePositionSetX;
+    JLabel mousePositionSetYLabel;
+    JTextField mousePositionSetY;
+    
     // Keyboard event
     JPanel keyboardEventPanel;
     JLabel keyboardEventLabel;
@@ -70,12 +79,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         
         timeIntervalPanel = new JPanel();
         timeIntervalLabel = new JLabel("Time interval:");
-        timeIntervalField = new JTextField(4);
+        timeIntervalField = new JTextField(3);
         timeIntervalUnit = new JComboBox<>();
     
         jitterAmountPanel = new JPanel();
         jitterAmountCheckBox = new JCheckBox("Jitter");
-        jitterAmountField = new JTextField(4);
+        jitterAmountField = new JTextField(3);
         jitterAmountUnit = new JComboBox<>();
         
         eventTypePanel = new JPanel();
@@ -87,6 +96,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         mouseEventLabel = new JLabel("Mouse event:");
         mouseEventAction = new JComboBox<>();
     
+        mousePositionPanel = new JPanel();
+        mousePositionCheckBox = new JCheckBox("Set mouse position");
+        mousePositionSetPanel = new JPanel();
+        mousePositionSetXLabel = new JLabel("X:");
+        mousePositionSetX = new JTextField(3);
+        mousePositionSetYLabel = new JLabel("Y:");
+        mousePositionSetY = new JTextField(3);
+        
         keyboardEventPanel = new JPanel();
         keyboardEventLabel = new JLabel("Keyboard event:");
         keyboardEventRecorder = new JButton("Record key");
@@ -127,10 +144,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         
         eventTypeMouseBox.addItemListener(e ->
         {
-            if(eventTypeMouseBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40);
-            else frame.setSize(frame.getWidth(), frame.getHeight() - 40);
+            if(eventTypeMouseBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40 + 40);
+            else frame.setSize(frame.getWidth(), frame.getHeight() - 40 - 40);
             
             mouseEventPanel.setVisible(eventTypeMouseBox.isSelected());
+            mousePositionPanel.setVisible(eventTypeMouseBox.isSelected());
         });
         
         eventTypeKeyboardBox.addItemListener(e ->
@@ -140,6 +158,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
             
             keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected());
         });
+        
+        mousePositionCheckBox.addItemListener(e -> mousePositionSetPanel.setVisible(mousePositionCheckBox.isSelected()));
         
         keyboardEventRecorder.addActionListener(e ->
         {
@@ -155,6 +175,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         jitterAmountCheckBox.setToolTipText("<html>Timing inconsistency (jitter)<br>A random number between 0 and the specified jitter will be chosen<br>and added to the time interval at each action.");
         eventTypePanel.setToolTipText("Which events to execute at the chosen time interval");
         mouseEventPanel.setToolTipText("Which mouse event to execute per action");
+        mousePositionCheckBox.setToolTipText("Whether the autoclicker should click a specific location on the screen");
         keyboardEventPanel.setToolTipText("Which keyboard event to execute per action");
         keyboardEventRecorder.setToolTipText("<html>Press to start recording key inputs.<br>The next key input will be set as the key event.");
         
@@ -174,6 +195,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         mouseEventPanel.add(mouseEventLabel);
         mouseEventPanel.add(mouseEventAction);
         
+        mousePositionPanel.add(mousePositionCheckBox);
+        mousePositionSetPanel.add(mousePositionSetXLabel);
+        mousePositionSetPanel.add(mousePositionSetX);
+        mousePositionSetPanel.add(mousePositionSetYLabel);
+        mousePositionSetPanel.add(mousePositionSetY);
+        mousePositionPanel.add(mousePositionSetPanel);
+        
         keyboardEventPanel.add(keyboardEventLabel);
         keyboardEventPanel.add(keyboardEventRecorder);
         
@@ -185,6 +213,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         frame.add(jitterAmountPanel);
         frame.add(eventTypePanel);
         frame.add(mouseEventPanel);
+        frame.add(mousePositionPanel);
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
         
@@ -196,6 +225,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
         jitterAmountField.setEnabled(false);
         jitterAmountUnit.setEnabled(false);
         mouseEventPanel.setVisible(false);
+        mousePositionPanel.setVisible(false);
+        mousePositionSetPanel.setVisible(false);
         keyboardEventPanel.setVisible(false);
         
         // Initialise frame
@@ -258,7 +289,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener
                                 // Check to do mouse action
                                 if (eventTypeMouseBox.isSelected())
                                 {
-                                    // Initialise button to 0 to avoid having default branch in switch statement
+                                    // Check to position mouse
+                                    if (mousePositionCheckBox.isSelected())
+                                    {
+                                        robot.mouseMove(Integer.parseInt(mousePositionSetX.getText()), Integer.parseInt(mousePositionSetY.getText()));
+                                    }
+                                    
+                                    // Initialise button to 0
                                     int button = 0;
                             
                                     // Check which mouse action to do
