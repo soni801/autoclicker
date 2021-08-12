@@ -30,8 +30,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     boolean recordingMouse;
     boolean recordingKeyboard;
     
-    // Frame
+    // Frame & menu bar
     JFrame frame;
+    JMenuBar menuBar;
+    JMenu menu;
+    JMenuItem optionsMenuItem;
+    JMenuItem exitMenuItem;
     
     // Time interval
     JPanel timeIntervalPanel;
@@ -88,6 +92,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     {
         // Initialise objects
         frame = new JFrame();
+        menuBar = new JMenuBar();
+        menu = new JMenu("Autoclicker");
+        optionsMenuItem = new JMenuItem("Options");
+        exitMenuItem = new JMenuItem("Exit");
         
         timeIntervalPanel = new JPanel();
         timeIntervalLabel = new JLabel("Time interval:");
@@ -247,6 +255,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         frame.add(mousePositionRecorderPanel);
         frame.add(keyboardEventPanel);
         frame.add(statusPanel);
+        
+        // Add menu bar to frame
+        menu.add(optionsMenuItem);
+        menu.add(exitMenuItem);
+        
+        menuBar.add(menu);
+        frame.setJMenuBar(menuBar);
         
         // Set default combo box values
         timeIntervalUnit.setSelectedItem("Milliseconds");
