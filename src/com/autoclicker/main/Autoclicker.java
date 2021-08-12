@@ -211,7 +211,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                // TODO: Open settings
+                JFrame optionsFrame = new JFrame("Options");
+                optionsFrame.setSize(320, 300);
+                optionsFrame.setResizable(false);
+                optionsFrame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
+                optionsFrame.setLocationRelativeTo(null);
+                optionsFrame.setLayout(new BoxLayout(optionsFrame.getContentPane(), BoxLayout.Y_AXIS));
+                optionsFrame.setVisible(true);
             }
         });
         
