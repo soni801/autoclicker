@@ -11,6 +11,7 @@ import org.jnativehook.mouse.NativeMouseMotionListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Objects;
@@ -99,8 +100,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         frame = new JFrame();
         menuBar = new JMenuBar();
         menu = new JMenu("Autoclicker");
-        optionsMenuItem = new JMenuItem("Options");
-        exitMenuItem = new JMenuItem("Exit");
         
         timeIntervalPanel = new JPanel();
         timeIntervalLabel = new JLabel("Time interval:");
@@ -204,6 +203,25 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         {
             recordingKeyboard = true;
             keyboardEventRecorder.setText("Recording...");
+        });
+        
+        // Initialise menu items
+        optionsMenuItem = new JMenuItem(new AbstractAction("Options")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                // TODO: Open settings
+            }
+        });
+        
+        exitMenuItem = new JMenuItem(new AbstractAction("Exit")
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                System.exit(0);
+            }
         });
         
         // Set keystrokes
