@@ -12,6 +12,7 @@ import org.jnativehook.mouse.NativeMouseMotionListener;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     
     boolean recordingMouse;
     boolean recordingKeyboard;
+    
+    // Keystrokes
+    KeyStroke optionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.CTRL_DOWN_MASK);
+    KeyStroke exitKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_DOWN_MASK);
     
     // Frame & menu bar
     JFrame frame;
@@ -201,6 +206,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             keyboardEventRecorder.setText("Recording...");
         });
         
+        // Set keystrokes
+        optionsMenuItem.setAccelerator(optionsKeyStroke);
+        exitMenuItem.setAccelerator(exitKeyStroke);
+        
         // Disable space activating key recording
         keyboardEventRecorder.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
         
@@ -288,7 +297,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         
         // Initialise frame
         frame.setTitle("Soni's Autoclicker");
-        frame.setSize(320, 200);
+        frame.setSize(320, 220);
         frame.setResizable(false);
         frame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
