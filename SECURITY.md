@@ -5,7 +5,7 @@
 All versions are currently supported.
 
 | Version | Supported          |
-| ------- | ------------------ |
+|---------|--------------------|
 | 0.x     | :white_check_mark: |
 
 ## Reporting a Vulnerability
