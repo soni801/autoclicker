@@ -1,5 +1,14 @@
 package com.autoclicker.main;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -11,7 +20,6 @@ import org.jnativehook.mouse.NativeMouseMotionListener;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Objects;
@@ -105,11 +113,145 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
     public Autoclicker()
     {
-        // New Core
+        // Create the window
+        Display display = new Display();
+        Shell shell = new Shell(display);
+        shell.setText("Soni's Autoclicker");
+        shell.setLayout(new FillLayout());
+
+        // Create empty layout presets
+        RowLayout emptyRowLayout = new RowLayout();
+        emptyRowLayout.marginLeft = 0;
+
+        GridLayout emptyGridLayout = new GridLayout();
+        emptyGridLayout.marginWidth = 0;
+        emptyGridLayout.marginHeight = 0;
+
+        // Initialise tabs
+        TabFolder tabFolder = new TabFolder(shell, SWT.NONE);
+
+        TabItem autoclickerTab = new TabItem(tabFolder, SWT.NONE);
+        autoclickerTab.setText("Autoclicker");
+
+        TabItem settingsTab = new TabItem(tabFolder, SWT.NONE);
+        settingsTab.setText("Settings");
+
+        TabItem aboutTab = new TabItem(tabFolder, SWT.NONE);
+        aboutTab.setText("About");
+
+        // Create autoclicker composite
+        Composite autoclickerComposite = new Composite(tabFolder, SWT.NONE);
+        autoclickerComposite.setLayout(new GridLayout(2, false));
+        autoclickerTab.setControl(autoclickerComposite);
+
+        // Create timing composite
+        Composite timingComposite = new Composite(autoclickerComposite, SWT.NONE);
+        timingComposite.setLayoutData(fillData());
+        timingComposite.setLayout(emptyGridLayout);
+
+        // Create time interval group
+        Group timeIntervalGroup = new Group(timingComposite, SWT.NONE);
+        timeIntervalGroup.setLayoutData(fillData());
+        timeIntervalGroup.setLayout(new RowLayout());
+        timeIntervalGroup.setText("Time interval");
+
+        // Create time interval spinner
+        Spinner timeIntervalSpinner = new Spinner(timeIntervalGroup, SWT.NONE);
+
+        // Create time interval combo
+        Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.NONE);
+
+        // Create jitter group
+        Group jitterGroup = new Group(timingComposite, SWT.NONE);
+        jitterGroup.setLayoutData(fillData());
+        jitterGroup.setLayout(new GridLayout());
+        jitterGroup.setText("Jitter");
+
+        // Create jitter checkbox
+        Button jitterCheckbox = new Button(jitterGroup, SWT.CHECK);
+        jitterCheckbox.setText("Enable jitter (inconsistency)");
+
+        // Create jitter interval composite
+        Composite jitterIntervalComposite = new Composite(jitterGroup, SWT.CHECK);
+        jitterIntervalComposite.setLayout(emptyRowLayout);
+
+        // Create jitter interval spinner
+        Spinner jitterIntervalSpinner = new Spinner(jitterIntervalComposite, SWT.NONE);
+
+        // Create jitter interval combo
+        Combo jitterIntervalCombo = new Combo(jitterIntervalComposite, SWT.NONE);
+
+        // Create event group
+        Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
+        eventGroup.setLayoutData(fillData());
+        eventGroup.setLayout(new GridLayout());
+        eventGroup.setText("Events");
+
+        // Create mouse group
+        Group mouseGroup = new Group(eventGroup, SWT.NONE);
+        mouseGroup.setLayoutData(fillData());
+        mouseGroup.setLayout(new GridLayout());
+        mouseGroup.setText("Mouse");
+
+        // Create mouse button composite
+        Composite mouseButtonComposite = new Composite(mouseGroup, SWT.NONE);
+        mouseButtonComposite.setLayout(emptyRowLayout);
+
+        // Create mouse button label
+        Label mouseButtonLabel = new Label(mouseButtonComposite, SWT.NONE);
+        mouseButtonLabel.setText("Button:");
+
+        // Create mouse button combo
+        Combo mouseButtonCombo = new Combo(mouseButtonComposite, SWT.NONE);
+
+        // Create mouse position checkbox
+        Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
+        mousePositionCheckbox.setText("Specific mouse position");
+
+        // Create mouse position composite
+        Composite mousePositionComposite = new Composite(mouseGroup, SWT.NONE);
+        mousePositionComposite.setLayout(emptyRowLayout);
+
+        // Create mouse position x label
+        Label mousePositionXLabel = new Label(mousePositionComposite, SWT.NONE);
+        mousePositionXLabel.setText("X:");
+
+        // Create mouse position x spinner
+        Spinner mousePositionXSpinner = new Spinner(mousePositionComposite, SWT.NONE);
+
+        // Create mouse position y label
+        Label mousePositionYLabel = new Label(mousePositionComposite, SWT.NONE);
+        mousePositionYLabel.setText("Y:");
+
+        // Create mouse position y spinner
+        Spinner mousePositionYSpinner = new Spinner(mousePositionComposite, SWT.NONE);
+
+        // Create mouse position button
+        Button mousePositionButton = new Button(mouseGroup, SWT.PUSH);
+        mousePositionButton.setText("Or record a position");
+
+        // Create keyboard group
+        Group keyboardGroup = new Group(eventGroup, SWT.NONE);
+        keyboardGroup.setLayoutData(fillData());
+        keyboardGroup.setLayout(new GridLayout());
+        keyboardGroup.setText("Keyboard");
+
+        // Create keyboard button
+        Button keyboardButton = new Button(keyboardGroup, SWT.PUSH);
+        keyboardButton.setText("Record a key");
 
         // -------------------------------------------------------------------------------------------------------------
 
-        // Initialise objects
+        // Launch the application
+        shell.pack();
+        shell.open();
+        while (!shell.isDisposed()) if (!display.readAndDispatch()) display.sleep();
+
+        // Safely quit
+        display.dispose();
+        System.exit(0);
+
+        /*// Initialise objects
         frame = new JFrame();
         menuBar = new JMenuBar();
         menu = new JMenu("Autoclicker");
@@ -344,11 +486,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mousePositionRecorderPanel.setVisible(false);
         keyboardEventPanel.setVisible(false);
 
-        // Set JNativeHook logging
-        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-        logger.setLevel(Level.OFF);
-        logger.setUseParentHandlers(false);
-
         // Add native listeners
         GlobalScreen.addNativeKeyListener(this);
         GlobalScreen.addNativeMouseListener(this);
@@ -362,7 +499,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
-        frame.setVisible(true);
+        frame.setVisible(true);*/
     }
 
     @Override
@@ -520,18 +657,26 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent)
     {
-        // Check if the application is recording mouse position
-        if (recordingMouse)
-        {
-            mousePositionRecorderRecorder.setText(String.format("(%d, %d)", nativeMouseEvent.getX(), nativeMouseEvent.getY()));
-        }
+        // Set mouse position text
+        if (recordingMouse) mousePositionRecorderRecorder.setText(String.format("(%d, %d)", nativeMouseEvent.getX(), nativeMouseEvent.getY()));
     }
 
     @Override
     public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) { }
 
+    // Method to get fill data
+    public GridData fillData()
+    {
+        return new GridData(SWT.FILL, SWT.TOP, false, false);
+    }
+
     public static void main(String[] args)
     {
+        // Disable JNativeHook logging
+        Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+        logger.setLevel(Level.OFF);
+        logger.setUseParentHandlers(false);
+
         // Register native hook
         try { GlobalScreen.registerNativeHook(); }
         catch (NativeHookException e) { e.printStackTrace(); }
