@@ -122,9 +122,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         shell.setText("Soni's Autoclicker");
         shell.setLayout(new FillLayout());
 
-        // Create empty layout presets
+        // Create layout presets
         RowLayout emptyRowLayout = new RowLayout();
         emptyRowLayout.marginLeft = 0;
+        emptyRowLayout.center = true;
+
+        RowLayout rowLayout = new RowLayout();
+        rowLayout.center = true;
 
         GridLayout emptyGridLayout = new GridLayout();
         emptyGridLayout.marginWidth = 0;
@@ -155,7 +159,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create time interval group
         Group timeIntervalGroup = new Group(timingComposite, SWT.NONE);
         timeIntervalGroup.setLayoutData(fillData());
-        timeIntervalGroup.setLayout(new RowLayout());
+        timeIntervalGroup.setLayout(rowLayout);
         timeIntervalGroup.setText("Time interval");
 
         // Create time interval spinner
@@ -253,7 +257,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create binding tab group
         Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
         bindingTabGroup.setLayoutData(fillData());
-        bindingTabGroup.setLayout(new RowLayout());
+        bindingTabGroup.setLayout(rowLayout);
         bindingTabGroup.setText("Key binds");
 
         // Create toggle composite
