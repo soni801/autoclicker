@@ -3,6 +3,7 @@ package com.autoclicker.main;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.*;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
@@ -22,7 +23,6 @@ import org.jnativehook.mouse.NativeMouseMotionListener;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -34,8 +34,19 @@ import java.util.logging.Logger;
  */
 public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener, NativeMouseMotionListener
 {
+    // Metadata
     public static final String VERSION = "0.6";
 
+    // Status texts
+    public String status;
+    public final String activeText = "Running. Press %s to stop";
+    public final String inactiveText = "Not running. Press %s to start";
+
+    // Image paths
+    public final String activeImagePath = String.valueOf(getClass().getClassLoader().getResource("active.png")).substring(6);
+    public final String inactiveImagePath = String.valueOf(getClass().getClassLoader().getResource("inactive.png")).substring(6);
+
+    // -------
     boolean running;
     int keyboardEvent;
     long waitTime;
@@ -69,7 +80,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     ImageIcon active;
     ImageIcon inactive;
     JLabel statusImageLabel;
-    JLabel statusTextLabel;
 
     JButton optionsRebindRecorder;
 
@@ -77,9 +87,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     {
         // Create the window
         Display display = new Display();
-        Shell shell = new Shell(display);
+        Shell shell = new Shell(display, SWT.SHELL_TRIM & (~SWT.RESIZE));
         shell.setText("Soni's Autoclicker");
         shell.setLayout(new FillLayout());
+
+        // Load images
+        Image activeImage = new Image(display, activeImagePath);
+        Image inactiveImage = new Image(display, inactiveImagePath);
 
         // Create layout presets
         RowLayout emptyRowLayout = new RowLayout();
@@ -162,6 +176,20 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         jitterIntervalCombo.add("Microseconds");
         jitterIntervalCombo.add("Nanoseconds");
         jitterIntervalCombo.select(4);
+
+        // Create status group
+        Group statusGroup = new Group(timingComposite, SWT.NONE);
+        statusGroup.setLayoutData(fillData());
+        statusGroup.setLayout(new GridLayout());
+        statusGroup.setText("Status");
+
+        // Create status image
+        Label statusImage = new Label(statusGroup, SWT.NONE);
+        statusImage.setImage(inactiveImage);
+
+        // Create status label
+        Label statusLabel = new Label(statusGroup, SWT.NONE);
+        statusLabel.setText(inactiveText.formatted(NativeKeyEvent.getKeyText(toggleButton)));
 
         // Create event group
         Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
@@ -302,7 +330,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         /*
         active = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("active.png")));
         inactive = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("inactive.png")));
-        statusTextLabel = new JLabel(String.format("Not running. Press %s to start", NativeKeyEvent.getKeyText(toggleButton)));
 
         mousePositionRecorderRecorder.addActionListener(e -> recordingMouse = true);
 
@@ -327,6 +354,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Check whether the application is recording for a new key action
         switch (recordingKeyboard)
         {
+            // Not recording
             case 0 -> {
                 // Check for correct key press to enable autoclicker
                 if (nativeKeyEvent.getKeyCode() == toggleButton)
@@ -336,14 +364,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                         // Disable autoclicker
                         running = false;
                         statusImageLabel.setIcon(inactive);
-                        statusTextLabel.setText(String.format("Not running. Press %s to start", NativeKeyEvent.getKeyText(toggleButton)));
+                        status = inactiveText.formatted(NativeKeyEvent.getKeyText(toggleButton));
                     }
                     else
                     {
                         // Enable autoclicker
                         running = true;
                         statusImageLabel.setIcon(active);
-                        statusTextLabel.setText(String.format("Running. Press %s to stop", NativeKeyEvent.getKeyText(toggleButton)));
+                        status = activeText.formatted(NativeKeyEvent.getKeyText(toggleButton));
 
                         // Create new thread to handle events
                         new Thread(() ->
@@ -429,20 +457,20 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                     }
                 }
             }
+            // Recording keyboard action
             case 1 -> {
                 recordingKeyboard = 0;
                 keyboardEventRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
                 keyboardEvent = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
             }
+            // Recording binding
             case 2 -> {
                 recordingKeyboard = 0;
                 optionsRebindRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
                 toggleButton = nativeKeyEvent.getKeyCode();
 
-                if (running)
-                    statusTextLabel.setText(String.format("Running. Press %s to stop", NativeKeyEvent.getKeyText(toggleButton)));
-                else
-                    statusTextLabel.setText(String.format("Not running. Press %s to start", NativeKeyEvent.getKeyText(toggleButton)));
+                if (running) status = activeText.formatted(NativeKeyEvent.getKeyText(toggleButton));
+                else status = inactiveText.formatted(NativeKeyEvent.getKeyText(toggleButton));
             }
         }
     }
@@ -483,7 +511,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // Method to get fill data
     public GridData fillData()
     {
-        return new GridData(SWT.FILL, SWT.TOP, false, false);
+        return new GridData(SWT.FILL, SWT.FILL, false, true);
     }
 
     public static void main(String[] args)
