@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="autoclicker-linux">
+    <output-path>$PROJECT_DIR$/out/artifacts/autoclicker_linux</output-path>
+    <root id="archive" name="autoclicker-linux.jar">
+      <element id="module-output" name="autoclicker" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jnativehook.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/swt-linux.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

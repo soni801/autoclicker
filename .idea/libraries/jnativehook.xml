@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jnativehook">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jnativehook.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
