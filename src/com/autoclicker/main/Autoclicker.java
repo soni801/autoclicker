@@ -37,62 +37,64 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // Metadata
     public static final String VERSION = "0.6";
 
+    // Execution data
+    boolean active;
+    int toggleKey = 67;
+
+    public int timeInterval, jitterAmount;
+    public int timeUnit, jitterUnit;
+    public boolean jitter;
+
     // Status texts
     public String status;
-    public final String activeText = "Running. Press %s to stop";
-    public final String inactiveText = "Not running. Press %s to start";
+    public final String activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
+    public final String inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
 
     // Image paths
     public final String activeImagePath = String.valueOf(getClass().getClassLoader().getResource("active.png")).substring(6);
     public final String inactiveImagePath = String.valueOf(getClass().getClassLoader().getResource("inactive.png")).substring(6);
 
-    // Execution data
-    public int timeInterval, jitterAmount;
-    public int timeUnit, jitterUnit;
+    // Class objects
+    Shell shell;
+
+    // GUI elements
+    Label statusImage, statusLabel;
+    Image activeImage, inactiveImage;
 
     // -------
-    boolean running;
     int keyboardEvent;
     long waitTime;
 
-    int toggleKey = 67;
-
     boolean recordingMouse;
     int recordingKeyboard = 0;
-
-    JCheckBox jitterAmountCheckBox;
 
     JCheckBox eventTypeMouseBox;
     JCheckBox eventTypeKeyboardBox;
 
     JComboBox<String> mouseEventAction;
-
     JCheckBox mousePositionCheckBox;
 
     JTextField mousePositionWriteX;
     JTextField mousePositionWriteY;
 
     JButton mousePositionRecorderRecorder;
-
     JButton keyboardEventRecorder;
-
-    ImageIcon active;
-    ImageIcon inactive;
-    JLabel statusImageLabel;
-
     JButton optionsRebindRecorder;
 
     public Autoclicker()
     {
         // Create the window
         Display display = new Display();
-        Shell shell = new Shell(display, SWT.SHELL_TRIM & (~SWT.RESIZE));
+        shell = new Shell(display, SWT.SHELL_TRIM & (~SWT.RESIZE));
         shell.setText("Soni's Autoclicker");
         shell.setLayout(new FillLayout());
 
+        // Initialise objects
+        status = inactiveText;
+
         // Load images
-        Image activeImage = new Image(display, activeImagePath);
-        Image inactiveImage = new Image(display, inactiveImagePath);
+        activeImage = new Image(display, activeImagePath);
+        inactiveImage = new Image(display, inactiveImagePath);
 
         // Create layout presets
         RowLayout emptyRowLayout = new RowLayout();
@@ -174,6 +176,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create jitter checkbox
         Button jitterCheckbox = new Button(jitterGroup, SWT.CHECK);
         jitterCheckbox.setText("Enable jitter (inconsistency)");
+        jitterCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                jitter = jitterCheckbox.getSelection();
+            }
+        });
 
         // Create jitter amount composite
         Composite jitterAmountComposite = new Composite(jitterGroup, SWT.CHECK);
@@ -217,12 +227,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         statusGroup.setText("Status");
 
         // Create status image
-        Label statusImage = new Label(statusGroup, SWT.NONE);
+        statusImage = new Label(statusGroup, SWT.NONE);
         statusImage.setImage(inactiveImage);
 
         // Create status label
-        Label statusLabel = new Label(statusGroup, SWT.NONE);
-        statusLabel.setText(inactiveText.formatted(NativeKeyEvent.getKeyText(toggleKey)));
+        statusLabel = new Label(statusGroup, SWT.NONE);
+        statusLabel.setText(status);
 
         // Create event group
         Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
@@ -394,20 +404,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 // Check for correct key press to enable autoclicker
                 if (nativeKeyEvent.getKeyCode() == toggleKey)
                 {
-                    if (running)
+                    refreshStatus();
+                    active = !active;
+                    if (active) // Enable autoclicker
                     {
-                        // Disable autoclicker
-                        running = false;
-                        statusImageLabel.setIcon(inactive);
-                        status = inactiveText.formatted(NativeKeyEvent.getKeyText(toggleKey));
-                    }
-                    else
-                    {
-                        // Enable autoclicker
-                        running = true;
-                        statusImageLabel.setIcon(active);
-                        status = activeText.formatted(NativeKeyEvent.getKeyText(toggleKey));
-
                         // Create new thread to handle events
                         new Thread(() ->
                         {
@@ -417,7 +417,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                 Robot robot = new Robot();
 
                                 // Loop while autoclicker is running
-                                while (running)
+                                while (active)
                                 {
                                     // Print wait amount
                                     System.out.printf("Waited %dms\n", System.currentTimeMillis() - waitTime);
@@ -469,7 +469,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                     }
 
                                     // Sleep for jitter amount
-                                    if (jitterAmountCheckBox.isSelected())
+                                    if (jitter)
                                     {
                                         long amount = new Random().nextInt(jitterAmount);
                                         switch (jitterUnit)
@@ -504,7 +504,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 optionsRebindRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
                 toggleKey = nativeKeyEvent.getKeyCode();
 
-                if (running) status = activeText.formatted(NativeKeyEvent.getKeyText(toggleKey));
+                if (active) status = activeText.formatted(NativeKeyEvent.getKeyText(toggleKey));
                 else status = inactiveText.formatted(NativeKeyEvent.getKeyText(toggleKey));
             }
         }
@@ -547,6 +547,17 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public GridData fillData()
     {
         return new GridData(SWT.FILL, SWT.FILL, false, true);
+    }
+
+    // Method to redraw
+    public void refreshStatus()
+    {
+        shell.getDisplay().asyncExec(() ->
+        {
+            status = active ? activeText : inactiveText;
+            statusImage.setImage(active ? activeImage : inactiveImage);
+            statusLabel.setText(status);
+        });
     }
 
     public static void main(String[] args)
