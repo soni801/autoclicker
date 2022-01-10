@@ -45,74 +45,33 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     boolean recordingMouse;
     int recordingKeyboard = 0;
 
-    // Keystrokes
-    KeyStroke optionsKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.CTRL_DOWN_MASK);
-    KeyStroke exitKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_DOWN_MASK);
-
-    // Frames & menu bar
-    JFrame frame;
-    JMenuBar menuBar;
-    JMenu menu;
-    JMenuItem optionsMenuItem;
-    JMenuItem exitMenuItem;
-    JFrame optionsFrame;
-
-    // Time interval
-    JPanel timeIntervalPanel;
-    JLabel timeIntervalLabel;
     JTextField timeIntervalField;
     JComboBox<String> timeIntervalUnit;
 
-    // Jitter amount
-    JPanel jitterAmountPanel;
     JCheckBox jitterAmountCheckBox;
     JTextField jitterAmountField;
     JComboBox<String> jitterAmountUnit;
 
-    // Event type
-    JPanel eventTypePanel;
-    JLabel eventTypeLabel;
     JCheckBox eventTypeMouseBox;
     JCheckBox eventTypeKeyboardBox;
 
-    // Mouse event
-    JPanel mouseEventPanel;
-    JLabel mouseEventLabel;
     JComboBox<String> mouseEventAction;
 
-    // Mouse position
-    JPanel mousePositionPanel;
     JCheckBox mousePositionCheckBox;
 
-    // Mouse position write
-    JPanel mousePositionWritePanel;
-    JLabel mousePositionWriteXLabel;
     JTextField mousePositionWriteX;
-    JLabel mousePositionWriteYLabel;
     JTextField mousePositionWriteY;
 
-    // Mouse position recorder
-    JPanel mousePositionRecorderPanel;
-    JLabel mousePositionRecorderLabel;
     JButton mousePositionRecorderRecorder;
 
-    // Keyboard event
-    JPanel keyboardEventPanel;
-    JLabel keyboardEventLabel;
     JButton keyboardEventRecorder;
 
-    // Status
-    JPanel statusPanel;
     ImageIcon active;
     ImageIcon inactive;
     JLabel statusImageLabel;
     JLabel statusTextLabel;
 
-    // Rebind
-    JPanel optionsRebindPanel;
-    JLabel optionsRebindLabel;
     JButton optionsRebindRecorder;
-    JLabel optionsRebindNotice;
 
     public Autoclicker()
     {
@@ -166,7 +125,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         Spinner timeIntervalSpinner = new Spinner(timeIntervalGroup, SWT.NONE);
 
         // Create time interval combo
-        Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.NONE);
+        Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.READ_ONLY);
+        timeIntervalCombo.add("Days");
+        timeIntervalCombo.add("Hours");
+        timeIntervalCombo.add("Minutes");
+        timeIntervalCombo.add("Seconds");
+        timeIntervalCombo.add("Milliseconds");
+        timeIntervalCombo.add("Microseconds");
+        timeIntervalCombo.add("Nanoseconds");
+        timeIntervalCombo.select(4);
 
         // Create jitter group
         Group jitterGroup = new Group(timingComposite, SWT.NONE);
@@ -186,7 +153,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         Spinner jitterIntervalSpinner = new Spinner(jitterIntervalComposite, SWT.NONE);
 
         // Create jitter interval combo
-        Combo jitterIntervalCombo = new Combo(jitterIntervalComposite, SWT.NONE);
+        Combo jitterIntervalCombo = new Combo(jitterIntervalComposite, SWT.READ_ONLY);
+        jitterIntervalCombo.add("Days");
+        jitterIntervalCombo.add("Hours");
+        jitterIntervalCombo.add("Minutes");
+        jitterIntervalCombo.add("Seconds");
+        jitterIntervalCombo.add("Milliseconds");
+        jitterIntervalCombo.add("Microseconds");
+        jitterIntervalCombo.add("Nanoseconds");
+        jitterIntervalCombo.select(4);
 
         // Create event group
         Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
@@ -209,7 +184,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mouseButtonLabel.setText("Button:");
 
         // Create mouse button combo
-        Combo mouseButtonCombo = new Combo(mouseButtonComposite, SWT.NONE);
+        Combo mouseButtonCombo = new Combo(mouseButtonComposite, SWT.READ_ONLY);
+        mouseButtonCombo.add("Left Click");
+        mouseButtonCombo.add("Middle Click");
+        mouseButtonCombo.add("Right Click");
+        mouseButtonCombo.select(0);
 
         // Create mouse position checkbox
         Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
@@ -306,6 +285,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // -------------------------------------------------------------------------------------------------------------
 
+        // Add native listeners
+        GlobalScreen.addNativeKeyListener(this);
+        GlobalScreen.addNativeMouseListener(this);
+        GlobalScreen.addNativeMouseMotionListener(this);
+
         // Launch the application
         shell.pack();
         shell.open();
@@ -315,255 +299,23 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         display.dispose();
         System.exit(0);
 
-        /*// Initialise objects
-        frame = new JFrame();
-        menuBar = new JMenuBar();
-        menu = new JMenu("Autoclicker");
-
-        timeIntervalPanel = new JPanel();
-        timeIntervalLabel = new JLabel("Time interval:");
-        timeIntervalField = new JTextField(3);
-        timeIntervalUnit = new JComboBox<>();
-
-        jitterAmountPanel = new JPanel();
-        jitterAmountCheckBox = new JCheckBox("Jitter");
-        jitterAmountField = new JTextField(3);
-        jitterAmountUnit = new JComboBox<>();
-
-        eventTypePanel = new JPanel();
-        eventTypeLabel = new JLabel("Event type:");
-        eventTypeMouseBox = new JCheckBox("Mouse");
-        eventTypeKeyboardBox = new JCheckBox("Keyboard");
-
-        mouseEventPanel = new JPanel();
-        mouseEventLabel = new JLabel("Mouse event:");
-        mouseEventAction = new JComboBox<>();
-
-        mousePositionPanel = new JPanel();
-        mousePositionCheckBox = new JCheckBox("Specific mouse position");
-
-        mousePositionWritePanel = new JPanel();
-        mousePositionWriteXLabel = new JLabel("Write a mouse position: X:");
-        mousePositionWriteX = new JTextField(3);
-        mousePositionWriteYLabel = new JLabel("Y:");
-        mousePositionWriteY = new JTextField(3);
-
-        mousePositionRecorderPanel = new JPanel();
-        mousePositionRecorderLabel = new JLabel("Or record a mouse position:");
-        mousePositionRecorderRecorder = new JButton("Record");
-
-        keyboardEventPanel = new JPanel();
-        keyboardEventLabel = new JLabel("Keyboard event:");
-        keyboardEventRecorder = new JButton("Record key");
-
-        statusPanel = new JPanel();
+        /*
         active = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("active.png")));
         inactive = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("inactive.png")));
-        statusImageLabel = new JLabel(inactive);
         statusTextLabel = new JLabel(String.format("Not running. Press %s to start", NativeKeyEvent.getKeyText(toggleButton)));
-
-        // Add items to ComboBox
-        timeIntervalUnit.addItem("Days");
-        timeIntervalUnit.addItem("Hours");
-        timeIntervalUnit.addItem("Minutes");
-        timeIntervalUnit.addItem("Seconds");
-        timeIntervalUnit.addItem("Milliseconds");
-        timeIntervalUnit.addItem("Microseconds");
-        timeIntervalUnit.addItem("Nanoseconds");
-
-        jitterAmountUnit.addItem("Days");
-        jitterAmountUnit.addItem("Hours");
-        jitterAmountUnit.addItem("Minutes");
-        jitterAmountUnit.addItem("Seconds");
-        jitterAmountUnit.addItem("Milliseconds");
-        jitterAmountUnit.addItem("Microseconds");
-        jitterAmountUnit.addItem("Nanoseconds");
-
-        mouseEventAction.addItem("Left Click");
-        mouseEventAction.addItem("Middle Click");
-        mouseEventAction.addItem("Right Click");
-
-        // Add listeners
-        jitterAmountCheckBox.addItemListener(e ->
-        {
-            jitterAmountField.setEnabled(jitterAmountCheckBox.isSelected());
-            jitterAmountUnit.setEnabled(jitterAmountCheckBox.isSelected());
-        });
-
-        eventTypeMouseBox.addItemListener(e ->
-        {
-            if (eventTypeMouseBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40 + 40);
-            else frame.setSize(frame.getWidth(), frame.getHeight() - 40 - 40);
-
-            mouseEventPanel.setVisible(eventTypeMouseBox.isSelected());
-            mousePositionPanel.setVisible(eventTypeMouseBox.isSelected());
-        });
-
-        eventTypeKeyboardBox.addItemListener(e ->
-        {
-            if (eventTypeKeyboardBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40);
-            else frame.setSize(frame.getWidth(), frame.getHeight() - 40);
-
-            keyboardEventPanel.setVisible(eventTypeKeyboardBox.isSelected());
-        });
-
-        mousePositionCheckBox.addItemListener(e ->
-        {
-            if (mousePositionCheckBox.isSelected()) frame.setSize(frame.getWidth(), frame.getHeight() + 40 + 40);
-            else frame.setSize(frame.getWidth(), frame.getHeight() - 40 - 40);
-
-            mousePositionWritePanel.setVisible(mousePositionCheckBox.isSelected());
-            mousePositionRecorderPanel.setVisible(mousePositionCheckBox.isSelected());
-        });
 
         mousePositionRecorderRecorder.addActionListener(e -> recordingMouse = true);
 
-        keyboardEventRecorder.addActionListener(e ->
-        {
-            recordingKeyboard = 1;
-            keyboardEventRecorder.setText("Recording...");
-        });
+        keyboardEventRecorder.addActionListener(e ->recordingKeyboard = 1;
 
-        // Initialise menu items
-        optionsMenuItem = new JMenuItem(new AbstractAction("Options")
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                // Initialise objects
-                optionsFrame = new JFrame("Options");
-
-                optionsRebindPanel = new JPanel();
-                optionsRebindLabel = new JLabel("Toggle button:");
-                optionsRebindRecorder = new JButton(NativeKeyEvent.getKeyText(toggleButton));
-                optionsRebindNotice = new JLabel("(resets on close)");
-
-                // Add listeners
-                optionsRebindRecorder.addActionListener(ev ->
-                {
-                    recordingKeyboard = 2;
-                    optionsRebindRecorder.setText("Recording...");
-                });
-
-                //Add objects to panels
-                optionsRebindPanel.add(optionsRebindLabel);
-                optionsRebindPanel.add(optionsRebindRecorder);
-                optionsRebindPanel.add(optionsRebindNotice);
-
-                // Add panels to frame
-                optionsFrame.add(optionsRebindPanel);
-
-                optionsFrame.setSize(300, 80);
-                optionsFrame.setResizable(false);
-                optionsFrame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
-                optionsFrame.setLocationRelativeTo(null);
-                optionsFrame.setLayout(new BoxLayout(optionsFrame.getContentPane(), BoxLayout.Y_AXIS));
-                optionsFrame.setVisible(true);
-            }
-        });
-
-        exitMenuItem = new JMenuItem(new AbstractAction("Exit")
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                System.exit(0);
-            }
-        });
-
-        // Set keystrokes
-        optionsMenuItem.setAccelerator(optionsKeyStroke);
-        exitMenuItem.setAccelerator(exitKeyStroke);
+        optionsRebindRecorder = new JButton(NativeKeyEvent.getKeyText(toggleButton));
+        optionsRebindRecorder.addActionListener(ev ->recordingKeyboard = 2;
 
         // Disable space activating key recording
         keyboardEventRecorder.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
 
-        // Set tooltips
-        timeIntervalPanel.setToolTipText("Amount of time to wait between each action");
-        jitterAmountCheckBox.setToolTipText("<html>Timing inconsistency (jitter)<br>A random number between 0 and the specified jitter will be chosen<br>and added to the time interval at each action.");
-        eventTypePanel.setToolTipText("Which events to execute at the chosen time interval");
-        mouseEventPanel.setToolTipText("Which mouse event to execute per action");
-        mousePositionCheckBox.setToolTipText("Whether the autoclicker should click a specific location on the screen");
-        keyboardEventPanel.setToolTipText("Which keyboard event to execute per action");
-        keyboardEventRecorder.setToolTipText("<html>Press to start recording key inputs.<br>The next key input will be set as the key event.");
-
-        // Add objects to panels
-        timeIntervalPanel.add(timeIntervalLabel);
-        timeIntervalPanel.add(timeIntervalField);
-        timeIntervalPanel.add(timeIntervalUnit);
-
-        jitterAmountPanel.add(jitterAmountCheckBox);
-        jitterAmountPanel.add(jitterAmountField);
-        jitterAmountPanel.add(jitterAmountUnit);
-
-        eventTypePanel.add(eventTypeLabel);
-        eventTypePanel.add(eventTypeMouseBox);
-        eventTypePanel.add(eventTypeKeyboardBox);
-
-        mouseEventPanel.add(mouseEventLabel);
-        mouseEventPanel.add(mouseEventAction);
-
-        mousePositionPanel.add(mousePositionCheckBox);
-
-        mousePositionWritePanel.add(mousePositionWriteXLabel);
-        mousePositionWritePanel.add(mousePositionWriteX);
-        mousePositionWritePanel.add(mousePositionWriteYLabel);
-        mousePositionWritePanel.add(mousePositionWriteY);
-
-        mousePositionRecorderPanel.add(mousePositionRecorderLabel);
-        mousePositionRecorderPanel.add(mousePositionRecorderRecorder);
-
-        keyboardEventPanel.add(keyboardEventLabel);
-        keyboardEventPanel.add(keyboardEventRecorder);
-
-        statusPanel.add(statusImageLabel);
-        statusPanel.add(statusTextLabel);
-
-        // Add panels to frame
-        frame.add(timeIntervalPanel);
-        frame.add(jitterAmountPanel);
-        frame.add(eventTypePanel);
-        frame.add(mouseEventPanel);
-        frame.add(mousePositionPanel);
-        frame.add(mousePositionWritePanel);
-        frame.add(mousePositionRecorderPanel);
-        frame.add(keyboardEventPanel);
-        frame.add(statusPanel);
-
-        // Add menu bar to frame
-        menu.add(optionsMenuItem);
-        menu.add(exitMenuItem);
-
-        menuBar.add(menu);
-        frame.setJMenuBar(menuBar);
-
-        // Set default combo box values
-        timeIntervalUnit.setSelectedItem("Milliseconds");
-        jitterAmountUnit.setSelectedItem("Milliseconds");
-
-        // Set enabled & visibility
-        jitterAmountField.setEnabled(false);
-        jitterAmountUnit.setEnabled(false);
-        mouseEventPanel.setVisible(false);
-        mousePositionPanel.setVisible(false);
-        mousePositionWritePanel.setVisible(false);
-        mousePositionRecorderPanel.setVisible(false);
-        keyboardEventPanel.setVisible(false);
-
-        // Add native listeners
-        GlobalScreen.addNativeKeyListener(this);
-        GlobalScreen.addNativeMouseListener(this);
-        GlobalScreen.addNativeMouseMotionListener(this);
-
-        // Initialise frame
-        frame.setTitle("Soni's Autoclicker");
-        frame.setSize(320, 220);
-        frame.setResizable(false);
         frame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
-        frame.setVisible(true);*/
+        */
     }
 
     @Override
