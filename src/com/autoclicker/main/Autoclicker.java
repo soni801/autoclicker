@@ -20,10 +20,8 @@ import org.jnativehook.mouse.NativeMouseEvent;
 import org.jnativehook.mouse.NativeMouseListener;
 import org.jnativehook.mouse.NativeMouseMotionListener;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -39,16 +37,21 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
     // Execution data
     boolean active;
+    int recording;
     int toggleKey = 67;
 
     public int timeInterval, jitterAmount;
     public int timeUnit, jitterUnit;
     public boolean jitter;
+    public int x, y;
+
+    public int mouse, keyboard;
+    public boolean mouseMove;
 
     // Status texts
     public String status;
-    public final String activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
-    public final String inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
+    public String activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
+    public String inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
 
     // Image paths
     public final String activeImagePath = String.valueOf(getClass().getClassLoader().getResource("active.png")).substring(6);
@@ -60,26 +63,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // GUI elements
     Label statusImage, statusLabel;
     Image activeImage, inactiveImage;
-
-    // -------
-    int keyboardEvent;
-    long waitTime;
-
-    boolean recordingMouse;
-    int recordingKeyboard = 0;
-
-    JCheckBox eventTypeMouseBox;
-    JCheckBox eventTypeKeyboardBox;
-
-    JComboBox<String> mouseEventAction;
-    JCheckBox mousePositionCheckBox;
-
-    JTextField mousePositionWriteX;
-    JTextField mousePositionWriteY;
-
-    JButton mousePositionRecorderRecorder;
-    JButton keyboardEventRecorder;
-    JButton optionsRebindRecorder;
+    Button mousePositionButton, keyboardButton, toggleButton;
+    Spinner mousePositionXSpinner, mousePositionYSpinner;
 
     public Autoclicker()
     {
@@ -169,7 +154,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create jitter group
         Group jitterGroup = new Group(timingComposite, SWT.NONE);
-        jitterGroup.setLayoutData(fillData());
         jitterGroup.setLayout(new GridLayout());
         jitterGroup.setText("Jitter");
 
@@ -246,6 +230,18 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mouseGroup.setLayout(new GridLayout());
         mouseGroup.setText("Mouse");
 
+        // Create mouse checkbox
+        Button mouseCheckbox = new Button(mouseGroup, SWT.CHECK);
+        mouseCheckbox.setText("Enable mouse event");
+        mouseCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (!mouseCheckbox.getSelection()) mouse = -1;
+            }
+        });
+
         // Create mouse button composite
         Composite mouseButtonComposite = new Composite(mouseGroup, SWT.NONE);
         mouseButtonComposite.setLayout(emptyRowLayout);
@@ -260,10 +256,26 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mouseButtonCombo.add("Middle Click");
         mouseButtonCombo.add("Right Click");
         mouseButtonCombo.select(0);
+        mouseButtonCombo.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                mouse = mouseButtonCombo.getSelectionIndex();
+            }
+        });
 
         // Create mouse position checkbox
         Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
         mousePositionCheckbox.setText("Specific mouse position");
+        mousePositionCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                mouseMove = mousePositionCheckbox.getSelection();
+            }
+        });
 
         // Create mouse position composite
         Composite mousePositionComposite = new Composite(mouseGroup, SWT.NONE);
@@ -274,20 +286,47 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mousePositionXLabel.setText("X:");
 
         // Create mouse position x spinner
-        Spinner mousePositionXSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
+        mousePositionXSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
+        mousePositionXSpinner.setMinimum(-10000);
         mousePositionXSpinner.setMaximum(10000);
+        mousePositionXSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                x = mousePositionXSpinner.getSelection();
+            }
+        });
 
         // Create mouse position y label
         Label mousePositionYLabel = new Label(mousePositionComposite, SWT.NONE);
         mousePositionYLabel.setText("Y:");
 
         // Create mouse position y spinner
-        Spinner mousePositionYSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
+        mousePositionYSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
+        mousePositionYSpinner.setMinimum(-10000);
         mousePositionYSpinner.setMaximum(10000);
+        mousePositionYSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                y = mousePositionYSpinner.getSelection();
+            }
+        });
 
         // Create mouse position button
-        Button mousePositionButton = new Button(mouseGroup, SWT.PUSH);
+        mousePositionButton = new Button(mouseGroup, SWT.PUSH);
         mousePositionButton.setText("Or record a position");
+        mousePositionButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 3;
+                mousePositionButton.setText("Recording...");
+            }
+        });
 
         // Create keyboard group
         Group keyboardGroup = new Group(eventGroup, SWT.NONE);
@@ -295,9 +334,30 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         keyboardGroup.setLayout(new GridLayout());
         keyboardGroup.setText("Keyboard");
 
+        // Create keyboard checkbox
+        Button keyboardCheckbox = new Button(keyboardGroup, SWT.CHECK);
+        keyboardCheckbox.setText("Enable keyboard event");
+        keyboardCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (!keyboardCheckbox.getSelection()) keyboard = -1;
+            }
+        });
+
         // Create keyboard button
-        Button keyboardButton = new Button(keyboardGroup, SWT.PUSH);
+        keyboardButton = new Button(keyboardGroup, SWT.PUSH);
         keyboardButton.setText("Record a key");
+        keyboardButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 1;
+                keyboardButton.setText("Recording...");
+            }
+        });
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -321,9 +381,17 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         toggleLabel.setText("Toggle autoclicker");
 
         // Create toggle button
-        Button toggleButton = new Button(toggleComposite, SWT.PUSH);
+        toggleButton = new Button(toggleComposite, SWT.PUSH);
         toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
+        toggleButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 2;
+            }
+        });
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -371,23 +439,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Safely quit
         display.dispose();
         System.exit(0);
-
-        /*
-        active = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("active.png")));
-        inactive = new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("inactive.png")));
-
-        mousePositionRecorderRecorder.addActionListener(e -> recordingMouse = true);
-
-        keyboardEventRecorder.addActionListener(e ->recordingKeyboard = 1;
-
-        optionsRebindRecorder = new JButton(NativeKeyEvent.getKeyText(toggleButton));
-        optionsRebindRecorder.addActionListener(ev ->recordingKeyboard = 2;
-
-        // Disable space activating key recording
-        keyboardEventRecorder.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "none");
-
-        frame.setIconImage(new ImageIcon(Objects.requireNonNull(this.getClass().getClassLoader().getResource("icon.png"))).getImage());
-        */
     }
 
     @Override
@@ -397,7 +448,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
     {
         // Check whether the application is recording for a new key action
-        switch (recordingKeyboard)
+        switch (recording)
         {
             // Not recording
             case 0 -> {
@@ -419,42 +470,34 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                 // Loop while autoclicker is running
                                 while (active)
                                 {
-                                    // Print wait amount
-                                    System.out.printf("Waited %dms\n", System.currentTimeMillis() - waitTime);
+                                    // Check to position mouse
+                                    if (mouseMove) robot.mouseMove(x, y);
 
-                                    // Check to do mouse action
-                                    if (eventTypeMouseBox.isSelected())
+                                    // FIXME: This way of checking to do mouse does not work (same for keyboard)
+                                    // Initialise button to 0
+                                    int button = 0;
+
+                                    // Check to do mouse
+                                    switch (mouse)
                                     {
-                                        // Check to position mouse
-                                        if (mousePositionCheckBox.isSelected())
-                                        {
-                                            robot.mouseMove(Integer.parseInt(mousePositionWriteX.getText()), Integer.parseInt(mousePositionWriteY.getText()));
-                                        }
+                                        case 0 -> button = InputEvent.BUTTON1_DOWN_MASK;
+                                        case 1 -> button = InputEvent.BUTTON2_DOWN_MASK;
+                                        case 2 -> button = InputEvent.BUTTON3_DOWN_MASK;
+                                    }
 
-                                        // Initialise button to 0
-                                        int button = 0;
-
-                                        // Check which mouse action to do
-                                        switch (Objects.requireNonNull(mouseEventAction.getSelectedItem()).toString())
-                                        {
-                                            case "Left Click" -> button = InputEvent.BUTTON1_DOWN_MASK;
-                                            case "Middle Click" -> button = InputEvent.BUTTON2_DOWN_MASK;
-                                            case "Right Click" -> button = InputEvent.BUTTON3_DOWN_MASK;
-                                        }
-
-                                        // Execute mouse action
+                                    // Execute mouse action
+                                    if (mouse != -1)
+                                    {
                                         robot.mousePress(button);
                                         robot.mouseRelease(button);
                                     }
 
                                     // Check to do keyboard action
-                                    if (eventTypeKeyboardBox.isSelected())
+                                    if (keyboard != -1)
                                     {
-                                        robot.keyPress(keyboardEvent);
-                                        robot.keyRelease(keyboardEvent);
+                                        robot.keyPress(keyboard);
+                                        robot.keyRelease(keyboard);
                                     }
-
-                                    waitTime = System.currentTimeMillis();
 
                                     // Sleep for the desired amount of time
                                     switch (timeUnit)
@@ -494,18 +537,19 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             }
             // Recording keyboard action
             case 1 -> {
-                recordingKeyboard = 0;
-                keyboardEventRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
-                keyboardEvent = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
+                // Update key event button
+                // This has to be done before it is stored as a Java Key Event
+                shell.getDisplay().asyncExec(() -> keyboardButton.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode())));
+
+                recording = 0;
+                keyboard = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
+                refreshBinds();
             }
             // Recording binding
             case 2 -> {
-                recordingKeyboard = 0;
-                optionsRebindRecorder.setText(NativeKeyEvent.getKeyText(nativeKeyEvent.getKeyCode()));
+                recording = 0;
                 toggleKey = nativeKeyEvent.getKeyCode();
-
-                if (active) status = activeText.formatted(NativeKeyEvent.getKeyText(toggleKey));
-                else status = inactiveText.formatted(NativeKeyEvent.getKeyText(toggleKey));
+                refreshBinds();
             }
         }
     }
@@ -519,14 +563,19 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMousePressed(NativeMouseEvent nativeMouseEvent)
     {
+        // FIXME: This can throw an error if the application is exited while recording
         // Check if the application is recording mouse position
-        if (recordingMouse)
+        if (recording == 3)
         {
-            recordingMouse = false;
-            mousePositionRecorderRecorder.setText("Record");
-
-            mousePositionWriteX.setText(String.valueOf(nativeMouseEvent.getX()));
-            mousePositionWriteY.setText(String.valueOf(nativeMouseEvent.getY()));
+            recording = 0;
+            x = nativeMouseEvent.getX();
+            y = nativeMouseEvent.getY();
+            shell.getDisplay().asyncExec(() ->
+            {
+                mousePositionButton.setText("Or record a position");
+                mousePositionXSpinner.setSelection(x);
+                mousePositionYSpinner.setSelection(y);
+            });
         }
     }
 
@@ -536,8 +585,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent)
     {
-        // Set mouse position text
-        if (recordingMouse) mousePositionRecorderRecorder.setText(String.format("(%d, %d)", nativeMouseEvent.getX(), nativeMouseEvent.getY()));
+        try
+        {
+            // Set mouse position text
+            shell.getDisplay().asyncExec(() ->
+            {
+                if (recording == 3) mousePositionButton.setText("(%d, %d)".formatted(nativeMouseEvent.getX(), nativeMouseEvent.getY()));
+            });
+        }
+        catch (Exception ignored) { }
     }
 
     @Override
@@ -546,10 +602,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // Method to get fill data
     public GridData fillData()
     {
-        return new GridData(SWT.FILL, SWT.FILL, false, true);
+        return new GridData(SWT.FILL, SWT.FILL, false, false);
     }
 
-    // Method to redraw
+    // Methods to redraw
     public void refreshStatus()
     {
         shell.getDisplay().asyncExec(() ->
@@ -557,6 +613,20 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             status = active ? activeText : inactiveText;
             statusImage.setImage(active ? activeImage : inactiveImage);
             statusLabel.setText(status);
+        });
+    }
+
+    public void refreshBinds()
+    {
+        shell.getDisplay().asyncExec(() ->
+        {
+            // Update status texts
+            activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
+            inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
+            refreshStatus();
+
+            // Update settings button
+            toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         });
     }
 
