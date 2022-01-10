@@ -1,10 +1,11 @@
 package com.autoclicker.main;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.*;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -33,6 +34,8 @@ import java.util.logging.Logger;
  */
 public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener, NativeMouseMotionListener
 {
+    public static final String VERSION = "0.6";
+
     boolean running;
     int keyboardEvent;
     long waitTime;
@@ -239,6 +242,63 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create keyboard button
         Button keyboardButton = new Button(keyboardGroup, SWT.PUSH);
         keyboardButton.setText("Record a key");
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        // Create settings composite
+        Composite settingsComposite = new Composite(tabFolder, SWT.NONE);
+        settingsComposite.setLayout(new FillLayout());
+        settingsTab.setControl(settingsComposite);
+
+        // Create binding tab group
+        Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
+        bindingTabGroup.setLayoutData(fillData());
+        bindingTabGroup.setLayout(new RowLayout());
+        bindingTabGroup.setText("Key binds");
+
+        // Create toggle composite
+        Composite toggleComposite = new Composite(bindingTabGroup, SWT.NONE);
+        toggleComposite.setLayout(emptyRowLayout);
+
+        // Create toggle label
+        Label toggleLabel = new Label(toggleComposite, SWT.NONE);
+        toggleLabel.setText("Toggle autoclicker");
+
+        // Create toggle button
+        Button toggleButton = new Button(toggleComposite, SWT.PUSH);
+        toggleButton.setText("F6");
+        toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        // Create about composite
+        Composite aboutComposite = new Composite(tabFolder, SWT.NONE);
+        aboutComposite.setLayout(new GridLayout());
+        aboutTab.setControl(aboutComposite);
+
+        // Create about label
+        Link aboutLabel = new Link(aboutComposite, SWT.NONE);
+        aboutLabel.setText("""
+                Soni's Autoclicker v%s
+                By <a href="https://github.com/soni801">Soni</a>
+                
+                Soni's Autoclicker is an attempt at making automation
+                powerful and accessible to everyone.
+                
+                It is built in Java and is fully open source - you can check
+                out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.
+                
+                It uses <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a> for its features.
+                
+                Thanks to <a href="https://github.com/LilleAndersen">Little</a> for testing.""".formatted(VERSION));
+        aboutLabel.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                Program.launch(e.text);
+            }
+        });
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -529,7 +589,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                         statusImageLabel.setIcon(active);
                         statusTextLabel.setText(String.format("Running. Press %s to stop", NativeKeyEvent.getKeyText(toggleButton)));
 
-                        // Create new thread to handle autoclicking
+                        // Create new thread to handle events
                         new Thread(() ->
                         {
                             try
