@@ -66,7 +66,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     {
         // Create the window
         Display display = new Display();
-        shell = new Shell(display, SWT.SHELL_TRIM & (~SWT.RESIZE));
+        shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
         shell.setText("Soni's Autoclicker");
         shell.setLayout(new FillLayout());
 
