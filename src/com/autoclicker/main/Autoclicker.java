@@ -40,12 +40,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     int recording;
     int toggleKey = 67;
 
-    public int timeInterval, jitterAmount;
+    public int timeInterval = 1, jitterAmount;
     public int timeUnit, jitterUnit;
     public boolean jitter;
     public int x, y;
 
-    public int mouse, keyboard;
+    public int mouse, keyboard = -1;
     public boolean mouseMove;
 
     // Status texts
@@ -53,16 +53,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public String activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
     public String inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
 
-    // Image paths
-    public final String activeImagePath = String.valueOf(getClass().getClassLoader().getResource("active.png")).substring(6);
-    public final String inactiveImagePath = String.valueOf(getClass().getClassLoader().getResource("inactive.png")).substring(6);
-
     // Class objects
     Shell shell;
 
     // GUI elements
     Label statusImage, statusLabel;
-    Image activeImage, inactiveImage;
+    Image activeImage, inactiveImage, iconImage;
     Button mousePositionButton, keyboardButton, toggleButton;
     Spinner mousePositionXSpinner, mousePositionYSpinner;
 
@@ -78,8 +74,9 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         status = inactiveText;
 
         // Load images
-        activeImage = new Image(display, activeImagePath);
-        inactiveImage = new Image(display, inactiveImagePath);
+        activeImage = new Image(display, this.getClass().getClassLoader().getResourceAsStream("active.png"));
+        inactiveImage = new Image(display, this.getClass().getClassLoader().getResourceAsStream("inactive.png"));
+        iconImage = new Image(display, this.getClass().getClassLoader().getResourceAsStream("icon.png"));
 
         // Create layout presets
         RowLayout emptyRowLayout = new RowLayout();
@@ -307,10 +304,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 Soni's Autoclicker is an attempt at making automation
                 powerful and accessible to everyone.
                 
-                It is built in Java and is fully open source - you can check
-                out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.
-                
-                It uses <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a> for its features.
+                It is built in Java using <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a>
+                and is fully open source - you can check out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.
                 
                 Thanks to <a href="https://github.com/LilleAndersen">Little</a> for testing.""".formatted(VERSION));
 
@@ -509,7 +504,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         GlobalScreen.addNativeMouseListener(this);
         GlobalScreen.addNativeMouseMotionListener(this);
 
-        // Launch the application
+        // Final prep & launch application
+        shell.setImage(iconImage);
         shell.pack();
         shell.open();
         while (!shell.isDisposed()) if (!display.readAndDispatch()) display.sleep();
