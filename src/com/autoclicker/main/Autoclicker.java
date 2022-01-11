@@ -153,6 +153,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create jitter amount spinner
         Spinner jitterAmountSpinner = new Spinner(jitterAmountComposite, SWT.BORDER);
         jitterAmountSpinner.setMaximum(1000);
+        jitterAmountSpinner.setEnabled(false);
 
         // Create jitter amount combo
         Combo jitterAmountCombo = new Combo(jitterAmountComposite, SWT.READ_ONLY);
@@ -164,6 +165,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         jitterAmountCombo.add("Microseconds");
         jitterAmountCombo.add("Nanoseconds");
         jitterAmountCombo.select(4);
+        jitterAmountCombo.setEnabled(false);
 
         // Create status group
         Group statusGroup = new Group(timingComposite, SWT.NONE);
@@ -202,6 +204,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create mouse button label
         Label mouseButtonLabel = new Label(mouseButtonComposite, SWT.NONE);
         mouseButtonLabel.setText("Button:");
+        mouseButtonLabel.setEnabled(false);
 
         // Create mouse button combo
         Combo mouseButtonCombo = new Combo(mouseButtonComposite, SWT.READ_ONLY);
@@ -209,10 +212,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mouseButtonCombo.add("Middle Click");
         mouseButtonCombo.add("Right Click");
         mouseButtonCombo.select(0);
+        mouseButtonCombo.setEnabled(false);
 
         // Create mouse position checkbox
         Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
         mousePositionCheckbox.setText("Specific mouse position");
+        mousePositionCheckbox.setEnabled(false);
 
         // Create mouse position composite
         Composite mousePositionComposite = new Composite(mouseGroup, SWT.NONE);
@@ -221,24 +226,29 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create mouse position x label
         Label mousePositionXLabel = new Label(mousePositionComposite, SWT.NONE);
         mousePositionXLabel.setText("X:");
+        mousePositionXLabel.setEnabled(false);
 
         // Create mouse position x spinner
         mousePositionXSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
         mousePositionXSpinner.setMinimum(-10000);
         mousePositionXSpinner.setMaximum(10000);
+        mousePositionXSpinner.setEnabled(false);
 
         // Create mouse position y label
         Label mousePositionYLabel = new Label(mousePositionComposite, SWT.NONE);
         mousePositionYLabel.setText("Y:");
+        mousePositionYLabel.setEnabled(false);
 
         // Create mouse position y spinner
         mousePositionYSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
         mousePositionYSpinner.setMinimum(-10000);
         mousePositionYSpinner.setMaximum(10000);
+        mousePositionYSpinner.setEnabled(false);
 
         // Create mouse position button
         mousePositionButton = new Button(mouseGroup, SWT.PUSH);
         mousePositionButton.setText("Or record a position");
+        mousePositionButton.setEnabled(false);
 
         // Create keyboard group
         Group keyboardGroup = new Group(eventGroup, SWT.NONE);
@@ -253,6 +263,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create keyboard button
         keyboardButton = new Button(keyboardGroup, SWT.PUSH);
         keyboardButton.setText("Record a key");
+        keyboardButton.setEnabled(false);
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -331,7 +342,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             @Override
             public void widgetSelected(SelectionEvent e)
             {
+                // Store value
                 jitter = jitterCheckbox.getSelection();
+
+                // Toggle UI
+                jitterAmountSpinner.setEnabled(jitter);
+                jitterAmountCombo.setEnabled(jitter);
             }
         });
 
@@ -361,8 +377,20 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             @Override
             public void widgetSelected(SelectionEvent e)
             {
+                // Store values
                 if (!mouseCheckbox.getSelection()) mouse = -1;
                 else mouse = mouseButtonCombo.getSelectionIndex();
+
+                // Toggle UI
+                mouseButtonLabel.setEnabled(mouse != -1);
+                mouseButtonCombo.setEnabled(mouse != -1);
+                mousePositionCheckbox.setEnabled(mouse != -1);
+
+                mousePositionXLabel.setEnabled(mouse != -1 && mouseMove);
+                mousePositionXSpinner.setEnabled(mouse != -1 && mouseMove);
+                mousePositionYLabel.setEnabled(mouse != -1 && mouseMove);
+                mousePositionYSpinner.setEnabled(mouse != -1 && mouseMove);
+                mousePositionButton.setEnabled(mouse != -1 && mouseMove);
             }
         });
 
@@ -382,7 +410,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             @Override
             public void widgetSelected(SelectionEvent e)
             {
+                // Store value
                 mouseMove = mousePositionCheckbox.getSelection();
+
+                // Toggle UI
+                mousePositionXLabel.setEnabled(mouseMove);
+                mousePositionXSpinner.setEnabled(mouseMove);
+                mousePositionYLabel.setEnabled(mouseMove);
+                mousePositionYSpinner.setEnabled(mouseMove);
+                mousePositionButton.setEnabled(mouseMove);
             }
         });
 
@@ -423,11 +459,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             @Override
             public void widgetSelected(SelectionEvent e)
             {
+                // Store values
                 if (!keyboardCheckbox.getSelection())
                 {
                     keyboard = -1;
                     keyboardButton.setText("Record a key");
                 }
+
+                // Toggle UI
+                keyboardButton.setEnabled(keyboardCheckbox.getSelection());
             }
         });
 
