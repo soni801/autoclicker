@@ -124,14 +124,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create time interval spinner
         Spinner timeIntervalSpinner = new Spinner(timeIntervalGroup, SWT.BORDER);
         timeIntervalSpinner.setMaximum(10000);
-        timeIntervalSpinner.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                timeInterval = timeIntervalSpinner.getSelection();
-            }
-        });
+        timeIntervalSpinner.setSelection(1);
 
         // Create time interval combo
         Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.READ_ONLY);
@@ -143,14 +136,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         timeIntervalCombo.add("Microseconds");
         timeIntervalCombo.add("Nanoseconds");
         timeIntervalCombo.select(4);
-        timeIntervalCombo.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                timeUnit = timeIntervalCombo.getSelectionIndex();
-            }
-        });
 
         // Create jitter group
         Group jitterGroup = new Group(timingComposite, SWT.NONE);
@@ -160,14 +145,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create jitter checkbox
         Button jitterCheckbox = new Button(jitterGroup, SWT.CHECK);
         jitterCheckbox.setText("Enable jitter (inconsistency)");
-        jitterCheckbox.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                jitter = jitterCheckbox.getSelection();
-            }
-        });
 
         // Create jitter amount composite
         Composite jitterAmountComposite = new Composite(jitterGroup, SWT.CHECK);
@@ -176,14 +153,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create jitter amount spinner
         Spinner jitterAmountSpinner = new Spinner(jitterAmountComposite, SWT.BORDER);
         jitterAmountSpinner.setMaximum(1000);
-        jitterAmountSpinner.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                jitterAmount = jitterAmountSpinner.getSelection();
-            }
-        });
 
         // Create jitter amount combo
         Combo jitterAmountCombo = new Combo(jitterAmountComposite, SWT.READ_ONLY);
@@ -195,14 +164,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         jitterAmountCombo.add("Microseconds");
         jitterAmountCombo.add("Nanoseconds");
         jitterAmountCombo.select(4);
-        jitterAmountCombo.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                jitterUnit = jitterAmountCombo.getSelectionIndex();
-            }
-        });
 
         // Create status group
         Group statusGroup = new Group(timingComposite, SWT.NONE);
@@ -233,14 +194,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create mouse checkbox
         Button mouseCheckbox = new Button(mouseGroup, SWT.CHECK);
         mouseCheckbox.setText("Enable mouse event");
-        mouseCheckbox.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                if (!mouseCheckbox.getSelection()) mouse = -1;
-            }
-        });
 
         // Create mouse button composite
         Composite mouseButtonComposite = new Composite(mouseGroup, SWT.NONE);
@@ -256,26 +209,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mouseButtonCombo.add("Middle Click");
         mouseButtonCombo.add("Right Click");
         mouseButtonCombo.select(0);
-        mouseButtonCombo.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                mouse = mouseButtonCombo.getSelectionIndex();
-            }
-        });
 
         // Create mouse position checkbox
         Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
         mousePositionCheckbox.setText("Specific mouse position");
-        mousePositionCheckbox.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                mouseMove = mousePositionCheckbox.getSelection();
-            }
-        });
 
         // Create mouse position composite
         Composite mousePositionComposite = new Composite(mouseGroup, SWT.NONE);
@@ -289,14 +226,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mousePositionXSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
         mousePositionXSpinner.setMinimum(-10000);
         mousePositionXSpinner.setMaximum(10000);
-        mousePositionXSpinner.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                x = mousePositionXSpinner.getSelection();
-            }
-        });
 
         // Create mouse position y label
         Label mousePositionYLabel = new Label(mousePositionComposite, SWT.NONE);
@@ -306,27 +235,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         mousePositionYSpinner = new Spinner(mousePositionComposite, SWT.BORDER);
         mousePositionYSpinner.setMinimum(-10000);
         mousePositionYSpinner.setMaximum(10000);
-        mousePositionYSpinner.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                y = mousePositionYSpinner.getSelection();
-            }
-        });
 
         // Create mouse position button
         mousePositionButton = new Button(mouseGroup, SWT.PUSH);
         mousePositionButton.setText("Or record a position");
-        mousePositionButton.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                recording = 3;
-                mousePositionButton.setText("Recording...");
-            }
-        });
 
         // Create keyboard group
         Group keyboardGroup = new Group(eventGroup, SWT.NONE);
@@ -337,27 +249,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create keyboard checkbox
         Button keyboardCheckbox = new Button(keyboardGroup, SWT.CHECK);
         keyboardCheckbox.setText("Enable keyboard event");
-        keyboardCheckbox.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                if (!keyboardCheckbox.getSelection()) keyboard = -1;
-            }
-        });
 
         // Create keyboard button
         keyboardButton = new Button(keyboardGroup, SWT.PUSH);
         keyboardButton.setText("Record a key");
-        keyboardButton.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                recording = 1;
-                keyboardButton.setText("Recording...");
-            }
-        });
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -384,14 +279,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         toggleButton = new Button(toggleComposite, SWT.PUSH);
         toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
-        toggleButton.addSelectionListener(new SelectionAdapter()
-        {
-            @Override
-            public void widgetSelected(SelectionEvent e)
-            {
-                recording = 2;
-            }
-        });
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -415,6 +302,157 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 It uses <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a> for its features.
                 
                 Thanks to <a href="https://github.com/LilleAndersen">Little</a> for testing.""".formatted(VERSION));
+
+        // -------------------------------------------------------------------------------------------------------------
+
+        // Logic for setting time interval amount
+        timeIntervalSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                timeInterval = timeIntervalSpinner.getSelection();
+            }
+        });
+
+        // Logic for setting time interval unit
+        timeIntervalCombo.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                timeUnit = timeIntervalCombo.getSelectionIndex();
+            }
+        });
+
+        // Logic for toggling jitter
+        jitterCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                jitter = jitterCheckbox.getSelection();
+            }
+        });
+
+        // Logic for setting jitter amount
+        jitterAmountSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                jitterAmount = jitterAmountSpinner.getSelection();
+            }
+        });
+
+        // Logic for setting jitter unit
+        jitterAmountCombo.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                jitterUnit = jitterAmountCombo.getSelectionIndex();
+            }
+        });
+
+        // Logic for toggling mouse event
+        mouseCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (!mouseCheckbox.getSelection()) mouse = -1;
+                else mouse = mouseButtonCombo.getSelectionIndex();
+            }
+        });
+
+        // Logic for selecting mouse event type
+        mouseButtonCombo.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                mouse = mouseButtonCombo.getSelectionIndex();
+            }
+        });
+
+        // Logic for toggling specific mouse position
+        mousePositionCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                mouseMove = mousePositionCheckbox.getSelection();
+            }
+        });
+
+        // Logic for setting mouse X position
+        mousePositionXSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                x = mousePositionXSpinner.getSelection();
+            }
+        });
+
+        // Logic for setting mouse Y position
+        mousePositionYSpinner.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                y = mousePositionYSpinner.getSelection();
+            }
+        });
+
+        // Logic for recording mouse position
+        mousePositionButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 3;
+                mousePositionButton.setText("Recording...");
+            }
+        });
+
+        // Logic for toggling keyboard event
+        keyboardCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                if (!keyboardCheckbox.getSelection())
+                {
+                    keyboard = -1;
+                    keyboardButton.setText("Record a key");
+                }
+            }
+        });
+
+        // Logic for keyboard event key recording
+        keyboardButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 1;
+                keyboardButton.setText("Recording...");
+            }
+        });
+
+        // Logic for toggle button rebinding
+        toggleButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                recording = 2;
+            }
+        });
+
+        // Logic for launching browser when pressing links on about page
         aboutLabel.addSelectionListener(new SelectionAdapter()
         {
             @Override
@@ -437,7 +475,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         while (!shell.isDisposed()) if (!display.readAndDispatch()) display.sleep();
 
         // Safely quit
-        display.dispose();
         System.exit(0);
     }
 
@@ -473,7 +510,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                     // Check to position mouse
                                     if (mouseMove) robot.mouseMove(x, y);
 
-                                    // FIXME: This way of checking to do mouse does not work (same for keyboard)
                                     // Initialise button to 0
                                     int button = 0;
 
@@ -563,20 +599,24 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMousePressed(NativeMouseEvent nativeMouseEvent)
     {
-        // FIXME: This can throw an error if the application is exited while recording
-        // Check if the application is recording mouse position
-        if (recording == 3)
+        // Avoid errors if the application is exited while recording
+        try
         {
-            recording = 0;
-            x = nativeMouseEvent.getX();
-            y = nativeMouseEvent.getY();
-            shell.getDisplay().asyncExec(() ->
+            // Check if the application is recording mouse position
+            if (recording == 3)
             {
-                mousePositionButton.setText("Or record a position");
-                mousePositionXSpinner.setSelection(x);
-                mousePositionYSpinner.setSelection(y);
-            });
+                recording = 0;
+                x = nativeMouseEvent.getX();
+                y = nativeMouseEvent.getY();
+                shell.getDisplay().asyncExec(() ->
+                {
+                    mousePositionButton.setText("Or record a position");
+                    mousePositionXSpinner.setSelection(x);
+                    mousePositionYSpinner.setSelection(y);
+                });
+            }
         }
+        catch (Exception ignored) { }
     }
 
     @Override
@@ -585,6 +625,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent)
     {
+        // Avoid errors on application exit
         try
         {
             // Set mouse position text
