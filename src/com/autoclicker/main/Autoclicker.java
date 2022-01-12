@@ -544,7 +544,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                 while (active)
                                 {
                                     // Check to position mouse
-                                    if (mouseMove) robot.mouseMove(x, y);
+                                    if (mouse != -1 && mouseMove) robot.mouseMove(x, y);
 
                                     // Initialise button to 0
                                     int button = 0;
