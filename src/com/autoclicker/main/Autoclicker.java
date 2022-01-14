@@ -266,12 +266,12 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create settings composite
         Composite settingsComposite = new Composite(tabFolder, SWT.NONE);
-        settingsComposite.setLayout(new FillLayout());
+        settingsComposite.setLayout(new GridLayout());
         settingsTab.setControl(settingsComposite);
 
         // Create binding tab group
         Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
-        bindingTabGroup.setLayoutData(fillData());
+        bindingTabGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); // In the future, find out why fillData() doesn't work for this
         bindingTabGroup.setLayout(rowLayout);
         bindingTabGroup.setText("Key binds");
 
@@ -287,6 +287,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         toggleButton = new Button(toggleComposite, SWT.PUSH);
         toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
+
+        // Create disclaimer label
+        Label disclaimerLabel = new Label(settingsComposite, SWT.NONE);
+        disclaimerLabel.setText("Disclaimer: Settings are not saved between sessions.\nThis will be changed in a future release.");
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -305,9 +309,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 powerful and accessible to everyone.
                 
                 It is built in Java using <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a>
-                and is fully open source - you can check out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.
-                
-                Thanks to <a href="https://github.com/LilleAndersen">Little</a> for testing.""".formatted(VERSION));
+                and is fully open source - you can check out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.""".formatted(VERSION));
 
         // -------------------------------------------------------------------------------------------------------------
 
