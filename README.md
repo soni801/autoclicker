@@ -38,8 +38,8 @@ autoclicker supports:
   makes development faster and easier, and gives everyone the ability to have their own features implemented into the
   project. See anything you would like changed? Have a feature suggestion? Create an
   [issue](https://github.com/soni801/autoclicker/issues/new/choose), and I'd be sure to look at it!  Want to try
-  changing something yourself? I am open to PRs. Be sure to read [the contributing guidelines](CONTRIBUTING.md) before
-  contributing.
+  changing something yourself? I am open to PRs. Be sure to read
+  [the contributing guidelines](https://github.com/soni801/autoclicker/blob/main/CONTRIBUTING.md) before contributing.
 
 ---
 
