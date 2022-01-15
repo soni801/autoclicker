@@ -539,8 +539,9 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                         {
                             try
                             {
-                                // Create robot immediately when thread starts
+                                // Create objects immediately when thread starts
                                 Robot robot = new Robot();
+                                Random r = new Random();
 
                                 // Loop while autoclicker is running
                                 while (active)
@@ -574,32 +575,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                     }
 
                                     // Sleep for the desired amount of time
-                                    switch (timeUnit)
-                                    {
-                                        case 0 -> TimeUnit.DAYS.sleep(timeInterval);
-                                        case 1 -> TimeUnit.HOURS.sleep(timeInterval);
-                                        case 2 -> TimeUnit.MINUTES.sleep(timeInterval);
-                                        case 3 -> TimeUnit.SECONDS.sleep(timeInterval);
-                                        case 4 -> TimeUnit.MILLISECONDS.sleep(timeInterval);
-                                        case 5 -> TimeUnit.MICROSECONDS.sleep(timeInterval);
-                                        case 6 -> TimeUnit.NANOSECONDS.sleep(timeInterval);
-                                    }
-
-                                    // Sleep for jitter amount
-                                    if (jitter)
-                                    {
-                                        long amount = new Random().nextInt(jitterAmount);
-                                        switch (jitterUnit)
-                                        {
-                                            case 0 -> TimeUnit.DAYS.sleep(amount);
-                                            case 1 -> TimeUnit.HOURS.sleep(amount);
-                                            case 2 -> TimeUnit.MINUTES.sleep(amount);
-                                            case 3 -> TimeUnit.SECONDS.sleep(amount);
-                                            case 4 -> TimeUnit.MILLISECONDS.sleep(amount);
-                                            case 5 -> TimeUnit.MICROSECONDS.sleep(amount);
-                                            case 6 -> TimeUnit.NANOSECONDS.sleep(amount);
-                                        }
-                                    }
+                                    sleep(timeUnit, timeInterval); // Time interval
+                                    if (jitter) sleep(jitterUnit, r.nextInt(jitterAmount)); // Jitter amount
                                 }
                             } catch (AWTException | InterruptedException ignored) { }
                         }).start();
@@ -704,6 +681,20 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             // Update settings button
             toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         });
+    }
+
+    private void sleep(int timeUnit, long timeInterval) throws InterruptedException
+    {
+        switch (timeUnit)
+        {
+            case 0 -> TimeUnit.DAYS.sleep(timeInterval);
+            case 1 -> TimeUnit.HOURS.sleep(timeInterval);
+            case 2 -> TimeUnit.MINUTES.sleep(timeInterval);
+            case 3 -> TimeUnit.SECONDS.sleep(timeInterval);
+            case 4 -> TimeUnit.MILLISECONDS.sleep(timeInterval);
+            case 5 -> TimeUnit.MICROSECONDS.sleep(timeInterval);
+            case 6 -> TimeUnit.NANOSECONDS.sleep(timeInterval);
+        }
     }
 
     public static void main(String[] args)
