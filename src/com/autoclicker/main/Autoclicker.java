@@ -44,10 +44,13 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     private static final String CONFIG_FILE_NAME = "settings.cfg";
     Properties settings = new Properties();
 
+    // Settings
+    int toggleKey = 67; // Default to F9
+    boolean alwaysOnTop; // Default to false
+
     // Execution data
     boolean active;
     int recording;
-    int toggleKey = 67; // Default to F9
 
     public int timeInterval = 1, jitterAmount;
     public int timeUnit = 4, jitterUnit = 4; // Default to milliseconds
@@ -58,9 +61,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public boolean mouseMove;
 
     // Status texts
-    public String status;
-    public String activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
-    public String inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
+    public String status, activeText, inactiveText;
 
     // Class objects
     Shell shell;
@@ -73,11 +74,26 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
     public Autoclicker()
     {
+        // Define config directory
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) CONFIG_DIRECTORY = System.getenv("AppData");
+        else if (os.contains("mac")) CONFIG_DIRECTORY = System.getProperty("user.home") + "/Library/Application Support";
+        else CONFIG_DIRECTORY = System.getProperty("user.home") + "/.local/share";
+        CONFIG_DIRECTORY += "/%s/%s/".formatted(APPLICATION_VENDOR, APPLICATION_NAME);
+
+        // Load settings
+        loadSettings();
+
+        // -------------------------------------------------------------------------------------------------------------
+
         // Create the window
         Display display = new Display();
-        shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
+        if (alwaysOnTop) shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.ON_TOP);
+        else shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
 
-        // Initialise objects
+        // Initialise text
+        activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
+        inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
         status = inactiveText;
 
         // Load images
@@ -278,7 +294,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create binding tab group
         Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
-        bindingTabGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        bindingTabGroup.setLayoutData(fillData());
         bindingTabGroup.setLayout(rowLayout);
         bindingTabGroup.setText("Key binds");
 
@@ -294,6 +310,21 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         toggleButton = new Button(toggleComposite, SWT.PUSH);
         toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
+
+        // Create behaviour group
+        Group behaviourGroup = new Group(settingsComposite, SWT.NONE);
+        behaviourGroup.setLayoutData(fillData());
+        behaviourGroup.setLayout(rowLayout);
+        behaviourGroup.setText("Behaviour");
+
+        // Create always on top checkbox
+        Button alwaysOnTopCheckbox = new Button(behaviourGroup, SWT.CHECK);
+        alwaysOnTopCheckbox.setText("Always on top (requires restart)");
+        alwaysOnTopCheckbox.setSelection(alwaysOnTop);
+
+        // Create empty composite
+        Composite emptyComposite = new Composite(settingsComposite, SWT.NONE);
+        emptyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -492,6 +523,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             }
         });
 
+        alwaysOnTopCheckbox.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                alwaysOnTop = alwaysOnTopCheckbox.getSelection();
+            }
+        });
+
         // Logic for launching browser when pressing links on about page
         aboutLabel.addSelectionListener(new SelectionAdapter()
         {
@@ -503,16 +543,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         });
 
         // -------------------------------------------------------------------------------------------------------------
-
-        // Define config directory
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) CONFIG_DIRECTORY = System.getenv("AppData");
-        else if (os.contains("mac")) CONFIG_DIRECTORY = System.getProperty("user.home") + "/Library/Application Support";
-        else CONFIG_DIRECTORY = System.getProperty("user.home") + "/.local/share";
-        CONFIG_DIRECTORY += "/%s/%s/".formatted(APPLICATION_VENDOR, APPLICATION_NAME);
-
-        // Load settings
-        loadSettings();
 
         // Add native listeners
         GlobalScreen.addNativeKeyListener(this);
@@ -724,7 +754,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
             // Load settings
             toggleKey = Integer.parseInt(settings.getProperty("toggle-key"));
-            refreshBinds();
+            alwaysOnTop = Boolean.parseBoolean(settings.getProperty("always-on-top"));
         }
         catch (FileNotFoundException e)
         {
@@ -748,6 +778,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         {
             // Update settings
             settings.setProperty("toggle-key", String.valueOf(toggleKey));
+            settings.setProperty("always-on-top", String.valueOf(alwaysOnTop));
 
             // Store settings
             settings.store(new FileOutputStream(CONFIG_DIRECTORY + CONFIG_FILE_NAME), null);
