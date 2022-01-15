@@ -41,11 +41,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     int toggleKey = 67;
 
     public int timeInterval = 1, jitterAmount;
-    public int timeUnit, jitterUnit;
+    public int timeUnit = 4, jitterUnit = 4; // Default to milliseconds
     public boolean jitter;
     public int x, y;
 
-    public int mouse, keyboard = -1;
+    public int mouse = -1, keyboard = -1; // Disable by default
     public boolean mouseMove;
 
     // Status texts
@@ -531,7 +531,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 if (nativeKeyEvent.getKeyCode() == toggleKey)
                 {
                     refreshStatus();
-                    active = !active;
+                    active = !active; // Invert active
                     if (active) // Enable autoclicker
                     {
                         // Create new thread to handle events
@@ -601,10 +601,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                         }
                                     }
                                 }
-                            } catch (AWTException | InterruptedException e)
-                            {
-                                e.printStackTrace();
-                            }
+                            } catch (AWTException | InterruptedException ignored) { }
                         }).start();
                     }
                 }
