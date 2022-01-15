@@ -4,13 +4,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.*;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.*;
 import org.eclipse.swt.program.Program;
-import org.eclipse.swt.widgets.*;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.*;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -22,6 +22,8 @@ import org.jnativehook.mouse.NativeMouseMotionListener;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.io.*;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -33,12 +35,19 @@ import java.util.logging.Logger;
 public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, NativeMouseListener, NativeMouseMotionListener
 {
     // Metadata
-    public static final String VERSION = "0.6";
+    public static final String APPLICATION_VENDOR = "Soni";
+    public static final String APPLICATION_NAME = "Autoclicker";
+    public static final String APPLICATION_VERSION = "0.7";
+
+    // Runtime data
+    private static String CONFIG_DIRECTORY;
+    private static final String CONFIG_FILE_NAME = "settings.cfg";
+    Properties settings = new Properties();
 
     // Execution data
     boolean active;
     int recording;
-    int toggleKey = 67;
+    int toggleKey = 67; // Default to F9
 
     public int timeInterval = 1, jitterAmount;
     public int timeUnit = 4, jitterUnit = 4; // Default to milliseconds
@@ -67,8 +76,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create the window
         Display display = new Display();
         shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
-        shell.setText("Soni's Autoclicker");
-        shell.setLayout(new FillLayout());
 
         // Initialise objects
         status = inactiveText;
@@ -271,7 +278,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create binding tab group
         Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
-        bindingTabGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true)); // In the future, find out why fillData() doesn't work for this
+        bindingTabGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         bindingTabGroup.setLayout(rowLayout);
         bindingTabGroup.setText("Key binds");
 
@@ -288,10 +295,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
         toggleButton.setLayoutData(new RowData(80, SWT.DEFAULT));
 
-        // Create disclaimer label
-        Label disclaimerLabel = new Label(settingsComposite, SWT.NONE);
-        disclaimerLabel.setText("Disclaimer: Settings are not saved between sessions.\nThis will be changed in a future release.");
-
         // -------------------------------------------------------------------------------------------------------------
 
         // Create about composite
@@ -302,14 +305,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create about label
         Link aboutLabel = new Link(aboutComposite, SWT.NONE);
         aboutLabel.setText("""
-                Soni's Autoclicker v%s
-                By <a href="https://github.com/soni801">Soni</a>
-                
-                Soni's Autoclicker is an attempt at making automation
-                powerful and accessible to everyone.
-                
-                It is built in Java using <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a>
-                and is fully open source - you can check out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.""".formatted(VERSION));
+            Soni's Autoclicker v%s
+            By <a href="https://github.com/soni801">Soni</a>
+            
+            Soni's Autoclicker is an attempt at making automation
+            powerful and accessible to everyone.
+            
+            It is built in Java using <a href="https://github.com/kwhat/jnativehook">JNativeHook</a> and <a href="https://www.eclipse.org/swt/">SWT</a>
+            and is fully open source - you can check out the repository on <a href="https://github.com/soni801/autoclicker">GitHub</a>.""".formatted(APPLICATION_VERSION));
 
         // -------------------------------------------------------------------------------------------------------------
 
@@ -501,23 +504,36 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // -------------------------------------------------------------------------------------------------------------
 
+        // Define config directory
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) CONFIG_DIRECTORY = System.getenv("AppData");
+        else if (os.contains("mac")) CONFIG_DIRECTORY = System.getProperty("user.home") + "/Library/Application Support";
+        else CONFIG_DIRECTORY = System.getProperty("user.home") + "/.local/share";
+        CONFIG_DIRECTORY += "/%s/%s/".formatted(APPLICATION_VENDOR, APPLICATION_NAME);
+
+        // Load settings
+        loadSettings();
+
         // Add native listeners
         GlobalScreen.addNativeKeyListener(this);
         GlobalScreen.addNativeMouseListener(this);
         GlobalScreen.addNativeMouseMotionListener(this);
 
-        // Final prep & launch application
+        // Set window details & launch
+        shell.setLayout(new FillLayout());
+        shell.setText("Soni's Autoclicker");
         shell.setImage(iconImage);
         shell.pack();
         shell.open();
         while (!shell.isDisposed()) if (!display.readAndDispatch()) display.sleep();
 
         // Safely quit
+        saveSettings();
         System.exit(0);
     }
 
     @Override
-    public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent) { }
+    public void nativeKeyTyped(NativeKeyEvent nativeKeyEvent) {}
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
@@ -578,7 +594,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                                     sleep(timeUnit, timeInterval); // Time interval
                                     if (jitter) sleep(jitterUnit, r.nextInt(jitterAmount)); // Jitter amount
                                 }
-                            } catch (AWTException | InterruptedException ignored) { }
+                            }
+                            catch (AWTException | InterruptedException ignored) {}
                         }).start();
                     }
                 }
@@ -603,10 +620,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     }
 
     @Override
-    public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) { }
+    public void nativeKeyReleased(NativeKeyEvent nativeKeyEvent) {}
 
     @Override
-    public void nativeMouseClicked(NativeMouseEvent nativeMouseEvent) { }
+    public void nativeMouseClicked(NativeMouseEvent nativeMouseEvent) {}
 
     @Override
     public void nativeMousePressed(NativeMouseEvent nativeMouseEvent)
@@ -628,11 +645,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 });
             }
         }
-        catch (Exception ignored) { }
+        catch (Exception ignored) {}
     }
 
     @Override
-    public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) { }
+    public void nativeMouseReleased(NativeMouseEvent nativeMouseEvent) {}
 
     @Override
     public void nativeMouseMoved(NativeMouseEvent nativeMouseEvent)
@@ -646,11 +663,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 if (recording == 3) mousePositionButton.setText("(%d, %d)".formatted(nativeMouseEvent.getX(), nativeMouseEvent.getY()));
             });
         }
-        catch (Exception ignored) { }
+        catch (Exception ignored) {}
     }
 
     @Override
-    public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) { }
+    public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) {}
 
     // Method to get fill data
     public GridData fillData()
@@ -697,6 +714,50 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         }
     }
 
+    private void loadSettings()
+    {
+        try
+        {
+            // Load settings file
+            FileInputStream fileInputStream = new FileInputStream(CONFIG_DIRECTORY + CONFIG_FILE_NAME);
+            settings.load(fileInputStream);
+
+            // Load settings
+            toggleKey = Integer.parseInt(settings.getProperty("toggle-key"));
+            refreshBinds();
+        }
+        catch (FileNotFoundException e)
+        {
+            // Create settings directory
+            System.out.println("Settings file does not exist. Attempting to create...");
+            System.out.println(new File(CONFIG_DIRECTORY + CONFIG_FILE_NAME).getParentFile().mkdirs() ? "Created subdirectories" : "Could not create subdirectories. (Do they already exist?)");
+
+            // Create settings file
+            try
+            {
+                System.out.println(new File(CONFIG_DIRECTORY + CONFIG_FILE_NAME).createNewFile() ? "Created settings file" : "Failed to create settings file");
+            }
+            catch (IOException ignored) {}
+        }
+        catch (IOException ignored) {}
+    }
+
+    private void saveSettings()
+    {
+        try
+        {
+            // Update settings
+            settings.setProperty("toggle-key", String.valueOf(toggleKey));
+
+            // Store settings
+            settings.store(new FileOutputStream(CONFIG_DIRECTORY + CONFIG_FILE_NAME), null);
+        }
+        catch (IOException e)
+        {
+            System.out.println("Could not save settings");
+        }
+    }
+
     public static void main(String[] args)
     {
         // Disable JNativeHook logging
@@ -705,8 +766,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         logger.setUseParentHandlers(false);
 
         // Register native hook
-        try { GlobalScreen.registerNativeHook(); }
-        catch (NativeHookException e) { e.printStackTrace(); }
+        try
+        {
+            GlobalScreen.registerNativeHook();
+        }
+        catch (NativeHookException ignored) {}
 
         // Launch application
         new Autoclicker();
