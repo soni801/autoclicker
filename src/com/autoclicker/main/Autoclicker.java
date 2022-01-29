@@ -42,6 +42,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // Runtime data
     private static String CONFIG_DIRECTORY;
     private static final String CONFIG_FILE_NAME = "settings.cfg";
+    private static final String[] TIME_UNITS = new String[]{"Days", "Hours", "Minutes", "Seconds", "Milliseconds", "Microseconds", "Nanoseconds"};
     Properties settings = new Properties();
 
     // Settings
@@ -145,13 +146,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create time interval combo
         Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.READ_ONLY);
-        timeIntervalCombo.add("Days");
-        timeIntervalCombo.add("Hours");
-        timeIntervalCombo.add("Minutes");
-        timeIntervalCombo.add("Seconds");
-        timeIntervalCombo.add("Milliseconds");
-        timeIntervalCombo.add("Microseconds");
-        timeIntervalCombo.add("Nanoseconds");
+        for (String unit : TIME_UNITS) timeIntervalCombo.add(unit);
         timeIntervalCombo.select(4);
 
         // Create jitter group
@@ -174,13 +169,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create jitter amount combo
         Combo jitterAmountCombo = new Combo(jitterAmountComposite, SWT.READ_ONLY);
-        jitterAmountCombo.add("Days");
-        jitterAmountCombo.add("Hours");
-        jitterAmountCombo.add("Minutes");
-        jitterAmountCombo.add("Seconds");
-        jitterAmountCombo.add("Milliseconds");
-        jitterAmountCombo.add("Microseconds");
-        jitterAmountCombo.add("Nanoseconds");
+        for (String unit : TIME_UNITS) jitterAmountCombo.add(unit);
         jitterAmountCombo.select(4);
         jitterAmountCombo.setEnabled(false);
 
