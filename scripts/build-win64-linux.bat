@@ -13,7 +13,7 @@ del /q out\native\autoclicker_win64.zip /q out\native\autoclicker_linux.zip
 
 :: Build Windows image
 echo Building Windows image...[31m
-jpackage -t app-image -i out/artifacts/autoclicker_win64 --main-jar autoclicker-win64.jar -n "Soni's Autoclicker" --vendor "Soni" -d out/native/win64 --icon res/icon.ico && echo [32mSuccessfully built native Windows image!
+jpackage -t app-image -i out/artifacts/autoclicker_win64 --main-jar autoclicker-win64.jar -n "Soni's Autoclicker" --vendor "Soni" -d out/native/win64 --icon images/icon.ico && echo [32mSuccessfully built native Windows image!
 echo | set /p="[0m"
 
 :: Build Linux image
