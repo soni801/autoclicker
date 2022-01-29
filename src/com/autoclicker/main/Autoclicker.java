@@ -45,6 +45,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     Properties settings = new Properties();
 
     // Settings
+    InputType toggleType = InputType.Keyboard;
     int toggleKey = 67; // Default to F9
     boolean alwaysOnTop; // Default to false
 
@@ -69,7 +70,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     // GUI elements
     Label statusImage, statusLabel;
     Image activeImage, inactiveImage, iconImage;
-    Button mousePositionButton, keyboardButton, toggleButton;
+    Button mousePositionButton, keyboardButton, toggleButton, startButton, stopButton;
     Spinner mousePositionXSpinner, mousePositionYSpinner;
 
     public Autoclicker()
@@ -90,11 +91,6 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         Display display = new Display();
         if (alwaysOnTop) shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN | SWT.ON_TOP);
         else shell = new Shell(display, SWT.CLOSE | SWT.TITLE | SWT.MIN);
-
-        // Initialise text
-        activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
-        inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
-        status = inactiveText;
 
         // Load images
         activeImage = new Image(display, this.getClass().getClassLoader().getResourceAsStream("active.png"));
@@ -200,19 +196,21 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
         // Create status label
         statusLabel = new Label(statusGroup, SWT.NONE);
-        statusLabel.setText(status);
+        statusLabel.setText("\n\n");
+        statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         // Create toggleButtons composite
         Composite toggleButtonsComposite = new Composite(statusGroup, SWT.NONE);
         toggleButtonsComposite.setLayout(emptyRowLayout);
 
         // Create start button
-        Button startButton = new Button(toggleButtonsComposite, SWT.PUSH);
+        startButton = new Button(toggleButtonsComposite, SWT.PUSH);
         startButton.setText("Start");
 
         // Create stop button
-        Button stopButton = new Button(toggleButtonsComposite, SWT.PUSH);
+        stopButton = new Button(toggleButtonsComposite, SWT.PUSH);
         stopButton.setText("Stop");
+        stopButton.setEnabled(false);
 
         // Create event group
         Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
@@ -554,6 +552,8 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             public void widgetSelected(SelectionEvent e)
             {
                 recording = 2;
+                toggleButton.setText("Recording...");
+                toggleButton.setEnabled(false);
             }
         });
 
@@ -583,6 +583,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         GlobalScreen.addNativeMouseListener(this);
         GlobalScreen.addNativeMouseMotionListener(this);
 
+        // Refresh UI
+        refreshBinds();
+        refreshStatus();
+
         // Set window details & launch
         shell.setLayout(new FillLayout());
         shell.setText("Soni's Autoclicker");
@@ -603,14 +607,15 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     public void nativeKeyPressed(NativeKeyEvent nativeKeyEvent)
     {
         // Check whether the application is recording for a new key action
+        // Check the recording state of the application
         switch (recording)
         {
-            // Not recording
+            // Not recording, toggle clicker
             case 0 -> {
                 // Check for correct key press to enable autoclicker
-                if (nativeKeyEvent.getKeyCode() == toggleKey)
+                if (toggleType == InputType.Keyboard && nativeKeyEvent.getKeyCode() == toggleKey)
                 {
-                    active = !active; // Invert active
+                    active = !active; // Invert active state
                     if (active) start(); // Enable autoclicker
                     else refreshStatus();
                 }
@@ -625,9 +630,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 keyboard = getJavaKeyEvent(nativeKeyEvent).getKeyCode();
                 refreshBinds();
             }
-            // Recording binding
+            // Recording toggle bind
             case 2 -> {
                 recording = 0;
+                toggleType = InputType.Keyboard;
                 toggleKey = nativeKeyEvent.getKeyCode();
                 refreshBinds();
             }
@@ -643,21 +649,40 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     @Override
     public void nativeMousePressed(NativeMouseEvent nativeMouseEvent)
     {
-        // Avoid errors if the application is exited while recording
+        // Surround with try/catch to avoid errors if the application is exited while recording
         try
         {
-            // Check if the application is recording mouse position
-            if (recording == 3)
+            // Check the recording state of the application
+            switch (recording)
             {
-                recording = 0;
-                x = nativeMouseEvent.getX();
-                y = nativeMouseEvent.getY();
-                shell.getDisplay().asyncExec(() ->
-                {
-                    mousePositionButton.setText("Or record a position");
-                    mousePositionXSpinner.setSelection(x);
-                    mousePositionYSpinner.setSelection(y);
-                });
+                case 0 -> {
+                    // Check for correct key press to enable autoclicker
+                    if (toggleType == InputType.Mouse && nativeMouseEvent.getButton() == toggleKey)
+                    {
+                        active = !active; // Invert active state
+                        if (active) start(); // Enable autoclicker
+                        else refreshStatus();
+                    }
+                }
+                // Recording toggle bind
+                case 2 -> {
+                    recording = 0;
+                    toggleType = InputType.Mouse;
+                    toggleKey = nativeMouseEvent.getButton();
+                    refreshBinds();
+                }
+                // Recording position for mouse event
+                case 3 -> {
+                    recording = 0;
+                    x = nativeMouseEvent.getX();
+                    y = nativeMouseEvent.getY();
+                    shell.getDisplay().asyncExec(() ->
+                    {
+                        mousePositionButton.setText("Or record a position");
+                        mousePositionXSpinner.setSelection(x);
+                        mousePositionYSpinner.setSelection(y);
+                    });
+                }
             }
         }
         catch (Exception ignored) {}
@@ -709,7 +734,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                     // Initialise button to 0
                     int button = 0;
 
-                    // Check to do mouse
+                    // Set mouse button
                     switch (mouse)
                     {
                         case 0 -> button = InputEvent.BUTTON1_DOWN_MASK;
@@ -724,7 +749,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                         robot.mouseRelease(button);
                     }
 
-                    // Check to do keyboard action
+                    // Execute keyboard action
                     if (keyboard != -1)
                     {
                         robot.keyPress(keyboard);
@@ -751,9 +776,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     {
         shell.getDisplay().asyncExec(() ->
         {
+            // Refresh status text
             status = active ? activeText : inactiveText;
             statusImage.setImage(active ? activeImage : inactiveImage);
             statusLabel.setText(status);
+
+            // Refresh buttons
+            startButton.setEnabled(!active);
+            stopButton.setEnabled(active);
         });
     }
 
@@ -761,13 +791,19 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
     {
         shell.getDisplay().asyncExec(() ->
         {
+            // Define bind text
+            String bindText = toggleType == InputType.Keyboard ? NativeKeyEvent.getKeyText(toggleKey) : "Button %d".formatted(toggleKey);
+
             // Update status texts
-            activeText = "Running. Press %s to stop".formatted(NativeKeyEvent.getKeyText(toggleKey));
-            inactiveText = "Not running. Press %s to start".formatted(NativeKeyEvent.getKeyText(toggleKey));
+            activeText = "Running.\nPress %s to stop".formatted(bindText);
+            inactiveText = "Not running.\nPress %s to start".formatted(bindText);
             refreshStatus();
 
             // Update settings button
-            toggleButton.setText(NativeKeyEvent.getKeyText(toggleKey));
+            toggleButton.setText(bindText);
+
+            // Re-enable settings button
+            toggleButton.setEnabled(true);
         });
     }
 
@@ -795,6 +831,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
             // Load settings
             toggleKey = Integer.parseInt(settings.getProperty("toggle-key"));
+            toggleType = InputType.valueOf(settings.getProperty("toggle-type"));
             alwaysOnTop = Boolean.parseBoolean(settings.getProperty("always-on-top"));
         }
         catch (FileNotFoundException e)
@@ -810,6 +847,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             }
             catch (IOException ignored) {}
         }
+        catch (NullPointerException e)
+        {
+            System.out.println("One or more settings keys were missing. If this keeps occurring, please create an issue on GitHub.");
+        }
         catch (IOException ignored) {}
     }
 
@@ -819,6 +860,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         {
             // Update settings
             settings.setProperty("toggle-key", String.valueOf(toggleKey));
+            settings.setProperty("toggle-type", String.valueOf(toggleType));
             settings.setProperty("always-on-top", String.valueOf(alwaysOnTop));
 
             // Store settings
