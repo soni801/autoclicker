@@ -143,6 +143,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         timeIntervalSpinner.setMaximum(10000);
         timeIntervalSpinner.setMinimum(1);
         timeIntervalSpinner.setSelection(1);
+        timeIntervalSpinner.setToolTipText("The amount of time to wait between each action");
 
         // Create time interval combo
         Combo timeIntervalCombo = new Combo(timeIntervalGroup, SWT.READ_ONLY);
@@ -157,6 +158,11 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create jitter checkbox
         Button jitterCheckbox = new Button(jitterGroup, SWT.CHECK);
         jitterCheckbox.setText("Enable jitter (inconsistency)");
+        jitterCheckbox.setToolTipText("""
+            Timing inconsistency.
+            If enabled, a random number will be chosen between 0 and the value
+            you specify here, and will then be added onto the time interval.
+            This makes the autoclicker have inconsistency in its timing.""");
 
         // Create jitter amount composite
         Composite jitterAmountComposite = new Composite(jitterGroup, SWT.CHECK);
@@ -216,6 +222,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create mouse checkbox
         Button mouseCheckbox = new Button(mouseGroup, SWT.CHECK);
         mouseCheckbox.setText("Enable mouse event");
+        mouseCheckbox.setToolTipText("Execute a mouse action every interval");
 
         // Create mouse button composite
         Composite mouseButtonComposite = new Composite(mouseGroup, SWT.NONE);
@@ -238,6 +245,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         Button mousePositionCheckbox = new Button(mouseGroup, SWT.CHECK);
         mousePositionCheckbox.setText("Specific mouse position");
         mousePositionCheckbox.setEnabled(false);
+        mousePositionCheckbox.setToolTipText("Click in a specific spot on the screen every time");
 
         // Create mouse position composite
         Composite mousePositionComposite = new Composite(mouseGroup, SWT.NONE);
@@ -279,6 +287,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create keyboard checkbox
         Button keyboardCheckbox = new Button(keyboardGroup, SWT.CHECK);
         keyboardCheckbox.setText("Enable keyboard event");
+        keyboardCheckbox.setToolTipText("Execute a keyboard action every interval");
 
         // Create keyboard button
         keyboardButton = new Button(keyboardGroup, SWT.PUSH);
@@ -295,8 +304,14 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create binding tab group
         Group bindingTabGroup = new Group(settingsComposite, SWT.NONE);
         bindingTabGroup.setLayoutData(fillData());
-        bindingTabGroup.setLayout(rowLayout);
-        bindingTabGroup.setText("Key binds");
+        bindingTabGroup.setLayout(new GridLayout());
+        bindingTabGroup.setText("Hotkeys");
+
+        // Create binding label
+        Label bindingLabel = new Label(bindingTabGroup, SWT.NONE);
+        bindingLabel.setText("""
+            Which buttons to use for performing actions in the application.
+            They can be either mouse or keyboard buttons.""");
 
         // Create toggle composite
         Composite toggleComposite = new Composite(bindingTabGroup, SWT.NONE);
@@ -836,9 +851,10 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             }
             catch (IOException ignored) {}
         }
-        catch (NullPointerException e)
+        catch (NullPointerException | NumberFormatException e)
         {
-            System.out.println("One or more settings keys were missing. If this keeps occurring, please create an issue on GitHub.");
+            System.out.println("One or more settings keys were missing or corrupt. All user settings have been reset.");
+            System.out.println("If this keeps occurring, please create an issue on GitHub.");
         }
         catch (IOException ignored) {}
     }
