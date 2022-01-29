@@ -144,6 +144,7 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create time interval spinner
         Spinner timeIntervalSpinner = new Spinner(timeIntervalGroup, SWT.BORDER);
         timeIntervalSpinner.setMaximum(10000);
+        timeIntervalSpinner.setMinimum(1);
         timeIntervalSpinner.setSelection(1);
 
         // Create time interval combo
@@ -200,6 +201,18 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
         // Create status label
         statusLabel = new Label(statusGroup, SWT.NONE);
         statusLabel.setText(status);
+
+        // Create toggleButtons composite
+        Composite toggleButtonsComposite = new Composite(statusGroup, SWT.NONE);
+        toggleButtonsComposite.setLayout(emptyRowLayout);
+
+        // Create start button
+        Button startButton = new Button(toggleButtonsComposite, SWT.PUSH);
+        startButton.setText("Start");
+
+        // Create stop button
+        Button stopButton = new Button(toggleButtonsComposite, SWT.PUSH);
+        stopButton.setText("Stop");
 
         // Create event group
         Group eventGroup = new Group(autoclickerComposite, SWT.NONE);
@@ -402,6 +415,27 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
             }
         });
 
+        // Logic for starting the autoclicker
+        startButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                start();
+            }
+        });
+
+        // Logic for stopping the autoclicker
+        stopButton.addSelectionListener(new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected(SelectionEvent e)
+            {
+                active = false;
+                refreshStatus();
+            }
+        });
+
         // Logic for toggling mouse event
         mouseCheckbox.addSelectionListener(new SelectionAdapter()
         {
@@ -576,58 +610,9 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
                 // Check for correct key press to enable autoclicker
                 if (nativeKeyEvent.getKeyCode() == toggleKey)
                 {
-                    refreshStatus();
                     active = !active; // Invert active
-                    if (active) // Enable autoclicker
-                    {
-                        // Create new thread to handle events
-                        new Thread(() ->
-                        {
-                            try
-                            {
-                                // Create objects immediately when thread starts
-                                Robot robot = new Robot();
-                                Random r = new Random();
-
-                                // Loop while autoclicker is running
-                                while (active)
-                                {
-                                    // Check to position mouse
-                                    if (mouse != -1 && mouseMove) robot.mouseMove(x, y);
-
-                                    // Initialise button to 0
-                                    int button = 0;
-
-                                    // Check to do mouse
-                                    switch (mouse)
-                                    {
-                                        case 0 -> button = InputEvent.BUTTON1_DOWN_MASK;
-                                        case 1 -> button = InputEvent.BUTTON2_DOWN_MASK;
-                                        case 2 -> button = InputEvent.BUTTON3_DOWN_MASK;
-                                    }
-
-                                    // Execute mouse action
-                                    if (mouse != -1)
-                                    {
-                                        robot.mousePress(button);
-                                        robot.mouseRelease(button);
-                                    }
-
-                                    // Check to do keyboard action
-                                    if (keyboard != -1)
-                                    {
-                                        robot.keyPress(keyboard);
-                                        robot.keyRelease(keyboard);
-                                    }
-
-                                    // Sleep for the desired amount of time
-                                    sleep(timeUnit, timeInterval); // Time interval
-                                    if (jitter) sleep(jitterUnit, r.nextInt(jitterAmount)); // Jitter amount
-                                }
-                            }
-                            catch (AWTException | InterruptedException ignored) {}
-                        }).start();
-                    }
+                    if (active) start(); // Enable autoclicker
+                    else refreshStatus();
                 }
             }
             // Recording keyboard action
@@ -698,6 +683,62 @@ public class Autoclicker extends SwingKeyAdapter implements NativeKeyListener, N
 
     @Override
     public void nativeMouseDragged(NativeMouseEvent nativeMouseEvent) {}
+
+    // Method to start the autoclicker
+    private synchronized void start()
+    {
+        // Create new thread to handle events
+        new Thread(() ->
+        {
+            try
+            {
+                // Update status
+                active = true;
+                refreshStatus();
+
+                // Create objects immediately when thread starts
+                Robot robot = new Robot();
+                Random r = new Random();
+
+                // Loop while autoclicker is running
+                while (active)
+                {
+                    // Check to position mouse
+                    if (mouse != -1 && mouseMove) robot.mouseMove(x, y);
+
+                    // Initialise button to 0
+                    int button = 0;
+
+                    // Check to do mouse
+                    switch (mouse)
+                    {
+                        case 0 -> button = InputEvent.BUTTON1_DOWN_MASK;
+                        case 1 -> button = InputEvent.BUTTON2_DOWN_MASK;
+                        case 2 -> button = InputEvent.BUTTON3_DOWN_MASK;
+                    }
+
+                    // Execute mouse action
+                    if (mouse != -1)
+                    {
+                        robot.mousePress(button);
+                        robot.mouseRelease(button);
+                    }
+
+                    // Check to do keyboard action
+                    if (keyboard != -1)
+                    {
+                        robot.keyPress(keyboard);
+                        robot.keyRelease(keyboard);
+                    }
+
+                    // Sleep for the desired amount of time
+                    sleep(timeUnit, timeInterval); // Time interval
+                    if (jitter) sleep(jitterUnit, r.nextInt(jitterAmount)); // Jitter amount
+                }
+            }
+            catch (AWTException | InterruptedException ignored) {}
+        }).start();
+    }
 
     // Method to get fill data
     public GridData fillData()
